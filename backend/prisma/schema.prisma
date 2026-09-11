@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Book {
+  id Int @id @default(autoincrement())
+  name String
+  secundaryName String?
+  url String
+  lastChapter Int
+  status Int //This field refers to: 0 --> Pending, 1 --> In Progress and 2 --> Completed 3 --> Dropped
+  rating Float
+  coverPath String
+  createdAt DateTime
+  updateAt DateTime
+  completedAt DateTime
+}
+
+model Tag {
+  id Int @id @default(autoincrement())
+  name String
+}
+
+model BookTag {
+  bookId Int
+  tagId Int
+
+  @@id([bookId,tagId])
+}
