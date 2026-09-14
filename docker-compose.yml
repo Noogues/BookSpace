@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
 
     environment:
-      DATABASE_URL: postgresql://books:books@postgres:5432/bookspace
+      DATABASE_URL: ${DATABASE_URL:-postgresql://books:books@postgres:5432/bookspace}
       NODE_ENV: production
 
     depends_on:
