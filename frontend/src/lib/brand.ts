@@ -1,0 +1,2 @@
+export const BRAND_LOGO_CLASSES =
+  'grid h-10 w-10 place-items-center rounded-xl border border-stone-200/60 bg-white/50 text-teal-500 backdrop-blur-sm transition-colors dark:border-white/10 dark:bg-white/[0.05] dark:text-neon-teal'

@@ -20,20 +20,29 @@ model Book {
   lastChapter Int
   status Int //This field refers to: 0 --> Pending, 1 --> In Progress and 2 --> Completed 3 --> Dropped
   rating Float
-  coverPath String
-  createdAt DateTime
-  updateAt DateTime
-  completedAt DateTime
+  coverPath String?
+  createdAt DateTime @default(now())
+  updateAt DateTime @default(now()) @updatedAt
+  completedAt DateTime?
+
+  tags BookTag[]
+
+  @@index([status])
 }
 
 model Tag {
   id Int @id @default(autoincrement())
-  name String
+  name String @unique
+
+  books BookTag[]
 }
 
 model BookTag {
   bookId Int
   tagId Int
 
-  @@id([bookId,tagId])
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  tag Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, tagId])
 }
