@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { parseExcel } from '../lib/excel.js'
 import { prisma } from '../lib/prisma.js'
+import { requireAuth } from '../lib/auth.js'
 import { deleteCoverFile } from './covers.js'
 import type { Prisma } from '../../generated/prisma/client.js'
 
@@ -103,7 +104,7 @@ export async function booksRoutes(
     return book
   })
 
-  app.post('/books', async (request) => {
+  app.post('/books', { preHandler: requireAuth }, async (request) => {
     const data = createBookSchema.parse(request.body)
 
     const tagIds = await resolveTags(data.tags)
@@ -124,7 +125,7 @@ export async function booksRoutes(
     })
   })
 
-  app.patch('/books/:id', async (request, reply) => {
+  app.patch('/books/:id', { preHandler: requireAuth }, async (request, reply) => {
     const { id } = idParamSchema.parse(request.params)
     const data = updateBookSchema.parse(request.body)
 
@@ -168,7 +169,7 @@ export async function booksRoutes(
     return result
   })
 
-  app.delete('/books/:id', async (request, reply) => {
+  app.delete('/books/:id', { preHandler: requireAuth }, async (request, reply) => {
     const { id } = idParamSchema.parse(request.params)
     const existing = await prisma.book.findUnique({ where: { id } })
     if (!existing) return reply.status(404).send({ error: 'Libro no encontrado' })
@@ -179,7 +180,7 @@ export async function booksRoutes(
     return reply.status(204).send()
   })
 
-  app.post('/books/import', async (request, reply) => {
+  app.post('/books/import', { preHandler: requireAuth }, async (request, reply) => {
     const file = await request.file()
     if (!file) {
       return reply.status(400).send({ error: 'No se recibió ningún archivo' })

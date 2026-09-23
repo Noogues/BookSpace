@@ -5,6 +5,7 @@ import { ArrowLeft, ExternalLink, Pencil, Trash2 } from 'lucide-react'
 import i18n from '../i18n'
 import { deleteBook, getBook, updateBook } from '../lib/api'
 import type { Book, BookInput } from '../lib/types'
+import { useAuth } from '../auth/auth-context'
 import { formatDate, formatRating, resolveCoverPath } from '../lib/format'
 import { BookForm } from '../components/BookForm'
 import { ConfirmDialog } from '../components/ConfirmDialog'
@@ -41,6 +42,7 @@ function Cover({ coverPath, name }: { coverPath: string | null; name: string }) 
 export function BookDetailPage() {
   const { t } = useTranslation()
   const { push } = useToast()
+  const { user } = useAuth()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const bookId = Number(id)
@@ -218,14 +220,18 @@ export function BookDetailPage() {
             ) : null}
 
             <div className="flex gap-2 pt-2">
-              <button type="button" className="btn-secondary" onClick={() => setEditOpen(true)}>
-                <Pencil className="h-4 w-4" aria-hidden="true" />
-                {t('common.edit')}
-              </button>
-              <button type="button" className="btn-danger" onClick={() => setDeleteOpen(true)}>
-                <Trash2 className="h-4 w-4" aria-hidden="true" />
-                {t('common.delete')}
-              </button>
+              {user ? (
+                <>
+                  <button type="button" className="btn-secondary" onClick={() => setEditOpen(true)}>
+                    <Pencil className="h-4 w-4" aria-hidden="true" />
+                    {t('common.edit')}
+                  </button>
+                  <button type="button" className="btn-danger" onClick={() => setDeleteOpen(true)}>
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    {t('common.delete')}
+                  </button>
+                </>
+              ) : null}
             </div>
           </div>
         </div>

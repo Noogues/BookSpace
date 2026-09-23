@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
+import { requireAuth } from '../lib/auth.js'
 
 const createTagSchema = z.object({
   name: z.string().trim().min(1),
@@ -14,7 +15,7 @@ export async function tagsRoutes(app: FastifyInstance): Promise<void> {
     })
   })
 
-  app.post('/tags', async (request, reply) => {
+  app.post('/tags', { preHandler: requireAuth }, async (request, reply) => {
     const data = createTagSchema.parse(request.body)
     try {
       return await prisma.tag.upsert({
@@ -28,7 +29,7 @@ export async function tagsRoutes(app: FastifyInstance): Promise<void> {
     }
   })
 
-  app.delete('/tags/:id', async (request, reply) => {
+  app.delete('/tags/:id', { preHandler: requireAuth }, async (request, reply) => {
     const { id } = z.object({ id: z.coerce.number().int().positive() }).parse(request.params)
     try {
       return await prisma.tag.delete({ where: { id } })

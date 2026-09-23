@@ -1,9 +1,11 @@
 import { useState, type DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { FileSpreadsheet, Info, UploadCloud } from 'lucide-react'
+import { FileSpreadsheet, Info, Lock, UploadCloud } from 'lucide-react'
 import { errorData, errorStatus, importExcel } from '../lib/api'
 import type { ExcelRowError } from '../lib/types'
+import { useAuth } from '../auth/auth-context'
+import { LoginModal } from '../components/LoginModal'
 import { Spinner } from '../components/Spinner'
 import { useToast } from '../components/toast-context'
 
@@ -15,12 +17,35 @@ type Outcome =
 export function ImportPage() {
   const { t } = useTranslation()
   const { push } = useToast()
+  const { user } = useAuth()
 
   const [file, setFile] = useState<File | null>(null)
   const [importing, setImporting] = useState(false)
   const [outcome, setOutcome] = useState<Outcome>({ kind: 'idle' })
   const [errors, setErrors] = useState<ExcelRowError[]>([])
   const [dragging, setDragging] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false)
+
+  if (!user) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="page-title">{t('import.title')}</h1>
+          <p className="page-subtitle">{t('import.subtitle')}</p>
+        </div>
+        <div className="glass flex flex-col items-center gap-3 p-10 text-center animate-fade-up">
+          <Lock className="h-10 w-10 text-teal-500 dark:text-neon-teal" aria-hidden="true" />
+          <p className="max-w-sm text-sm text-stone-500 dark:text-stone-400">
+            {t('import.requiresLogin')}
+          </p>
+          <button type="button" className="btn-primary" onClick={() => setLoginOpen(true)}>
+            {t('auth.login')}
+          </button>
+        </div>
+        <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      </div>
+    )
+  }
 
   const acceptFile = (candidate: File | undefined | null) => {
     if (!candidate) return

@@ -37,6 +37,16 @@
     "confirm": "Confirmar",
     "none": "Sin portada"
   },
+  "auth": {
+    "title": "Iniciar sesión",
+    "username": "Usuario",
+    "password": "Contraseña",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "failed": "Usuario o contraseña incorrectos.",
+    "loggedIn": "Sesión iniciada.",
+    "loggedOut": "Sesión cerrada."
+  },
   "books": {
     "title": "Biblioteca",
     "shelfSubtitle": "Edita, filtra y organiza todos tus libros",
@@ -89,6 +99,7 @@
     "select": "Seleccionar archivo",
     "upload": "Importar",
     "uploading": "Importando…",
+    "requiresLogin": "Para importar libros debes iniciar sesión. Como invitado solo puedes ver el catálogo.",
     "success": "Se importaron {{count}} libros correctamente.",
     "successWithErrors": "Se importaron {{count}} libros, pero hubo errores en algunas filas.",
     "failed": "No se pudo importar ningún libro.",

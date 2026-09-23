@@ -30,6 +30,11 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL no definido en .env}
       NODE_ENV: ${NODE_ENV}
+      COVERS_DIR: /app/data/covers
+      ADMIN_USER: ${ADMIN_USER:?ADMIN_USER no definido en .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD no definido en .env}
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET no definido en .env}
+      COOKIE_SECURE: ${COOKIE_SECURE:-}
 
     depends_on:
       postgres:
@@ -52,5 +57,29 @@ services:
     ports:
       - "8080:80"
 
+  caddy:
+    image: caddy:2
+    container_name: bookspace-caddy
+    profiles: ["https"]
+    restart: unless-stopped
+
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN no definido en .env}
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+    depends_on:
+      - frontend
+
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:

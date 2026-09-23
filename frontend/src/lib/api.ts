@@ -11,7 +11,51 @@ import type {
   TagWithCount,
 } from './types'
 
-export const api = axios.create({ baseURL: '/api', paramsSerializer: { indexes: null } })
+export const api = axios.create({
+  baseURL: '/api',
+  withCredentials: true,
+  paramsSerializer: { indexes: null },
+})
+
+let unauthorizedHandler: (() => void) | null = null
+
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  unauthorizedHandler = handler
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 401 &&
+      !String(error.config?.url ?? '').startsWith('/auth/') &&
+      unauthorizedHandler
+    ) {
+      unauthorizedHandler()
+    }
+    return Promise.reject(error)
+  },
+)
+
+export async function login(username: string, password: string): Promise<{ username: string }> {
+  const { data } = await api.post<{ username: string }>('/auth/login', { username, password })
+  return data
+}
+
+export async function logout(): Promise<void> {
+  await api.post('/auth/logout')
+}
+
+export async function me(): Promise<{ username: string } | null> {
+  try {
+    const { data } = await api.get<{ username: string }>('/auth/me')
+    return data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) return null
+    throw error
+  }
+}
 
 export async function listBooks(filters: BookFilters = {}): Promise<PaginatedBooks> {
   const { data } = await api.get<PaginatedBooks>('/books', { params: filters })

@@ -37,6 +37,16 @@
     "confirm": "Confirm",
     "none": "No cover"
   },
+  "auth": {
+    "title": "Sign in",
+    "username": "Username",
+    "password": "Password",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "failed": "Incorrect username or password.",
+    "loggedIn": "Signed in.",
+    "loggedOut": "Signed out."
+  },
   "books": {
     "title": "Library",
     "shelfSubtitle": "Edit, filter and organize all your books",
@@ -89,6 +99,7 @@
     "select": "Select file",
     "upload": "Import",
     "uploading": "Importing…",
+    "requiresLogin": "You need to sign in to import books. As a guest you can only view the catalog.",
     "success": "{{count}} books imported successfully.",
     "successWithErrors": "{{count}} books imported, but some rows had errors.",
     "failed": "No books could be imported.",
