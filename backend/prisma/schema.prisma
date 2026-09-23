@@ -20,7 +20,7 @@ model Book {
   lastChapter Int
   status Int //This field refers to: 0 --> Pending, 1 --> In Progress and 2 --> Completed 3 --> Dropped
   rating Float
-  coverPath String
+  coverPath String?
   createdAt DateTime @default(now())
   updateAt DateTime @default(now()) @updatedAt
   completedAt DateTime?
