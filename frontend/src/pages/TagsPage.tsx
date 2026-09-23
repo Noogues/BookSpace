@@ -130,7 +130,7 @@ export function TagsPage() {
               key={tag.id}
               className="glass group flex max-w-full items-center gap-2 px-3 py-2 transition-all duration-300 hover:-translate-y-0.5 hover:border-neon-indigo/50 hover:shadow-xl hover:shadow-neon-indigo/10 dark:hover:border-neon-indigo/50"
             >
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-teal-500/20 to-neon-sky/20 text-teal-700 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 dark:from-neon-indigo/20 dark:to-neon-sky/20 dark:text-neon-teal">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-linear-to-br from-teal-500/20 to-neon-sky/20 text-teal-700 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 dark:from-neon-indigo/20 dark:to-neon-sky/20 dark:text-neon-teal">
                 <TagIcon className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
               <span className="min-w-0 truncate text-sm font-medium text-stone-800 dark:text-stone-200">
