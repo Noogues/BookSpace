@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { parseExcel } from '../lib/excel.js'
 import { prisma } from '../lib/prisma.js'
+import { deleteCoverFile } from './covers.js'
 import type { Prisma } from '../../generated/prisma/client.js'
 
 const bookInclude = { tags: { include: { tag: true } } } as const
@@ -13,7 +14,7 @@ const baseBookSchema = z.object({
   lastChapter: z.number().int().min(0).default(0),
   status: z.number().int().min(0).max(3).default(0),
   rating: z.number().min(0).max(10).default(0),
-  coverPath: z.string().trim().default(''),
+  coverPath: z.string().trim().nullable().default(null),
   completedAt: z.coerce.date().optional(),
   tags: z.array(z.string().trim().min(1)).default([]),
 })
@@ -27,7 +28,7 @@ const updateBookSchema = z.object({
   lastChapter: z.number().int().min(0).optional(),
   status: z.number().int().min(0).max(3).optional(),
   rating: z.number().min(0).max(10).optional(),
-  coverPath: z.string().trim().optional(),
+  coverPath: z.string().trim().nullable().optional(),
   completedAt: z.coerce.date().optional(),
   tags: z.array(z.string().trim().min(1)).optional(),
 })
@@ -35,7 +36,7 @@ const updateBookSchema = z.object({
 const listQuerySchema = z.object({
   name: z.string().trim().min(1).optional(),
   status: z.coerce.number().int().min(0).max(3).optional(),
-  tag: z.string().trim().min(1).optional(),
+  tag: z.union([z.string(), z.array(z.string())]).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 })
@@ -57,14 +58,25 @@ async function resolveTags(names: string[]): Promise<number[]> {
   return [...tagIds]
 }
 
-export async function booksRoutes(app: FastifyInstance): Promise<void> {
+export async function booksRoutes(
+  app: FastifyInstance,
+  opts: { coversDir: string },
+): Promise<void> {
+  const dir = opts.coversDir
+
   app.get('/books', async (request) => {
     const { name, status, tag, page, pageSize } = listQuerySchema.parse(request.query)
+
+    const tagList = (Array.isArray(tag) ? tag : tag ? [tag] : [])
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0)
 
     const where: Prisma.BookWhereInput = {
       ...(name ? { name: { contains: name, mode: 'insensitive' as const } } : {}),
       ...(status !== undefined ? { status } : {}),
-      ...(tag ? { tags: { some: { tag: { name: tag } } } } : {}),
+      ...(tagList.length > 0
+        ? { AND: tagList.map((name) => ({ tags: { some: { tag: { name } } } })) }
+        : {}),
     }
 
     const [total, items] = await Promise.all([
@@ -104,7 +116,7 @@ export async function booksRoutes(app: FastifyInstance): Promise<void> {
         lastChapter: data.lastChapter,
         status: data.status,
         rating: data.rating,
-        coverPath: data.coverPath,
+        ...(data.coverPath !== null ? { coverPath: data.coverPath } : {}),
         ...(data.completedAt !== undefined ? { completedAt: data.completedAt } : {}),
         ...(tagIds.length > 0 ? { tags: { create: tagIds.map((tagId) => ({ tagId })) } } : {}),
       },
@@ -121,7 +133,12 @@ export async function booksRoutes(app: FastifyInstance): Promise<void> {
 
     const tagIds = data.tags !== undefined ? await resolveTags(data.tags) : undefined
 
-    return prisma.book.update({
+    let coverPathToDelete: string | undefined
+    if (data.coverPath !== undefined && data.coverPath !== existing?.coverPath) {
+      coverPathToDelete = existing?.coverPath ?? undefined
+    }
+
+    const result = await prisma.book.update({
       where: { id },
       data: {
         ...(data.name !== undefined ? { name: data.name } : {}),
@@ -130,7 +147,7 @@ export async function booksRoutes(app: FastifyInstance): Promise<void> {
         ...(data.lastChapter !== undefined ? { lastChapter: data.lastChapter } : {}),
         ...(data.status !== undefined ? { status: data.status } : {}),
         ...(data.rating !== undefined ? { rating: data.rating } : {}),
-        ...(data.coverPath !== undefined ? { coverPath: data.coverPath } : {}),
+        ...(data.coverPath !== undefined ? { coverPath: data.coverPath as string } : {}),
         ...(data.completedAt !== undefined ? { completedAt: data.completedAt } : {}),
         ...(tagIds !== undefined
           ? {
@@ -143,12 +160,21 @@ export async function booksRoutes(app: FastifyInstance): Promise<void> {
       },
       include: bookInclude,
     })
+
+    if (coverPathToDelete) {
+      await deleteCoverFile(dir, coverPathToDelete)
+    }
+
+    return result
   })
 
   app.delete('/books/:id', async (request, reply) => {
     const { id } = idParamSchema.parse(request.params)
     const existing = await prisma.book.findUnique({ where: { id } })
     if (!existing) return reply.status(404).send({ error: 'Libro no encontrado' })
+    if (existing.coverPath) {
+      await deleteCoverFile(dir, existing.coverPath)
+    }
     await prisma.book.delete({ where: { id } })
     return reply.status(204).send()
   })
@@ -179,7 +205,7 @@ export async function booksRoutes(app: FastifyInstance): Promise<void> {
             lastChapter: book.lastChapter,
             status: book.status,
             rating: 0,
-            coverPath: '',
+            coverPath: null as unknown as string,
           },
         })
         createdCount += 1

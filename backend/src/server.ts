@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { ZodError } from 'zod'
 import { booksRoutes } from './routes/books.js'
+import { coversRoutes, MAX_UPLOAD_BYTES } from './routes/covers.js'
 import { tagsRoutes } from './routes/tags.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -13,12 +14,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = Fastify({ logger: true })
 
 await app.register(cors, { origin: true })
-await app.register(multipart)
+await app.register(multipart, {
+  limits: { files: 1, fileSize: MAX_UPLOAD_BYTES, fields: 5 },
+})
 
 const coversDir = process.env.COVERS_DIR ?? path.join(__dirname, '../../data/covers')
 await app.register(fastifyStatic, { root: coversDir, prefix: '/covers' })
 
-await app.register(booksRoutes, { prefix: '/api' })
+await app.register(booksRoutes, { prefix: '/api', coversDir })
+await app.register(coversRoutes, { prefix: '/api', coversDir })
 await app.register(tagsRoutes, { prefix: '/api' })
 
 app.get('/api/health', async () => ({ status: 'ok' }))
