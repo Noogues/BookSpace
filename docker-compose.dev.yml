@@ -5,6 +5,7 @@ services:
       - "5433:5432"
 
   backend:
+    command: npm run dev
     environment:
       NODE_ENV: development
       COVERS_DIR: /app/data/covers
@@ -16,6 +17,9 @@ services:
       - backend_generated:/app/generated
 
   frontend:
+    build:
+      target: dev
+    command: npm run dev -- --host 0.0.0.0
     environment:
       NODE_ENV: development
     ports:
