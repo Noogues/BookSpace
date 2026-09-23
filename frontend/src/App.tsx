@@ -9,6 +9,7 @@ import { BookDetailPage } from './pages/BookDetailPage'
 import { ImportPage } from './pages/ImportPage'
 import { TagsPage } from './pages/TagsPage'
 import { ThemeProvider } from './theme/ThemeProvider'
+import { AuthProvider } from './auth/AuthProvider'
 
 function Footer() {
   const { t } = useTranslation()
@@ -48,9 +49,11 @@ export default function App() {
   return (
     <ThemeProvider>
       <ToastProvider>
-        <BrowserRouter>
-          <Shell />
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <Shell />
+          </BrowserRouter>
+        </AuthProvider>
       </ToastProvider>
     </ThemeProvider>
   )

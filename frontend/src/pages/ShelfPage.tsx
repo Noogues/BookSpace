@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { createBook, listBooks, listTags, updateBook } from '../lib/api'
 import type { Book, BookFilters, BookInput, PaginatedBooks, TagWithCount } from '../lib/types'
+import { useAuth } from '../auth/auth-context'
 import { BookCard } from '../components/BookCard'
 import { BookForm } from '../components/BookForm'
 import { EmptyState } from '../components/EmptyState'
@@ -19,6 +20,7 @@ const EMPTY_FILTERS: FilterValues = { name: '', status: '', tags: [] }
 export function ShelfPage() {
   const { t } = useTranslation()
   const { push } = useToast()
+  const { user } = useAuth()
 
   const [filters, setFilters] = useState<FilterValues>(EMPTY_FILTERS)
   const [page, setPage] = useState(1)
@@ -144,10 +146,12 @@ export function ShelfPage() {
           <p className="page-subtitle">{t('books.shelfSubtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" className="btn-primary" onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            {t('books.new')}
-          </button>
+          {user ? (
+            <button type="button" className="btn-primary" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {t('books.new')}
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -171,7 +175,11 @@ export function ShelfPage() {
               <BookCard
                 key={book.id}
                 book={book}
-                onAdvance={(target, amount) => void handleAdvance(target, amount)}
+                onAdvance={
+                  user
+                    ? (target, amount) => void handleAdvance(target, amount)
+                    : undefined
+                }
               />
             ))}
           </div>

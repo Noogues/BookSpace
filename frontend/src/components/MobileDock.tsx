@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { NAV_ITEMS } from '../lib/nav'
+import { getNavItems } from '../lib/nav'
+import { useAuth } from '../auth/auth-context'
 
 function dockClass(isActive: boolean) {
   if (isActive) {
@@ -11,6 +12,7 @@ function dockClass(isActive: boolean) {
 
 export function MobileDock() {
   const { t } = useTranslation()
+  const { user } = useAuth()
 
   return (
     <nav
@@ -22,7 +24,7 @@ export function MobileDock() {
           className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-teal-500/50 to-transparent dark:via-neon-teal/40"
           aria-hidden="true"
         />
-        {NAV_ITEMS.map(({ to, key, icon: Icon, end }) => (
+        {getNavItems(!!user).map(({ to, key, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}

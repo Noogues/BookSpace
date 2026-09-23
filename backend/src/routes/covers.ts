@@ -3,6 +3,7 @@ import { mkdir, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import type { FastifyInstance } from 'fastify'
 import sharp from 'sharp'
+import { requireAuth } from '../lib/auth.js'
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 const MAX_WIDTH = 800
@@ -45,7 +46,7 @@ export async function coversRoutes(
       .toBuffer()
   }
 
-  app.post('/covers', async (request, reply) => {
+  app.post('/covers', { preHandler: requireAuth }, async (request, reply) => {
     let file: Awaited<ReturnType<typeof request.file>> | undefined
     try {
       file = await request.file()

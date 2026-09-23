@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, Tag as TagIcon, Trash2 } from 'lucide-react'
 import { createTag, deleteTag, listTags } from '../lib/api'
 import type { TagWithCount } from '../lib/types'
+import { useAuth } from '../auth/auth-context'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
@@ -12,6 +13,7 @@ import { useToast } from '../components/toast-context'
 export function TagsPage() {
   const { t } = useTranslation()
   const { push } = useToast()
+  const { user } = useAuth()
 
   const [tags, setTags] = useState<TagWithCount[]>([])
   const [loading, setLoading] = useState(true)
@@ -89,29 +91,31 @@ export function TagsPage() {
         <p className="page-subtitle">{t('app.tagline')}</p>
       </div>
 
-      <form onSubmit={handleCreate} className="glass flex flex-col gap-2 p-4 sm:flex-row sm:items-center animate-fade-up">
-        <div className="relative flex-1">
-          <TagIcon
-            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 dark:text-neon-indigo/70"
-            aria-hidden="true"
-          />
-          <input
-            className="input pl-10"
-            placeholder={t('tags.placeholder')}
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            aria-label={t('tags.placeholder')}
-          />
-        </div>
-        <button
-          type="submit"
-          className="btn-primary w-full shrink-0 sm:w-auto"
-          disabled={creating || !name.trim()}
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          {t('tags.new')}
-        </button>
-      </form>
+      {user ? (
+        <form onSubmit={handleCreate} className="glass flex flex-col gap-2 p-4 sm:flex-row sm:items-center animate-fade-up">
+          <div className="relative flex-1">
+            <TagIcon
+              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 dark:text-neon-indigo/70"
+              aria-hidden="true"
+            />
+            <input
+              className="input pl-10"
+              placeholder={t('tags.placeholder')}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              aria-label={t('tags.placeholder')}
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn-primary w-full shrink-0 sm:w-auto"
+            disabled={creating || !name.trim()}
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            {t('tags.new')}
+          </button>
+        </form>
+      ) : null}
 
       {loading ? (
         <Spinner label={t('common.loading')} />
@@ -133,17 +137,19 @@ export function TagsPage() {
                 {tag.name}
               </span>
               <span className="chip shrink-0">{t('tags.booksCount', { count: tag._count.books })}</span>
-              <button
-                type="button"
-                className="ml-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-stone-400 transition hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-300"
-                onClick={() => {
-                  setDeletingId(tag.id)
-                  setDeletingName(tag.name)
-                }}
-                aria-label={`${t('common.delete')} ${tag.name}`}
-              >
-                <Trash2 className="h-4 w-4" aria-hidden="true" />
-              </button>
+              {user ? (
+                <button
+                  type="button"
+                  className="ml-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-stone-400 transition hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-300"
+                  onClick={() => {
+                    setDeletingId(tag.id)
+                    setDeletingName(tag.name)
+                  }}
+                  aria-label={`${t('common.delete')} ${tag.name}`}
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                </button>
+              ) : null}
             </li>
           ))}
         </ul>

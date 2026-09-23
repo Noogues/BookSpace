@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { LogIn, LogOut } from 'lucide-react'
 import { checkHealth } from '../lib/api'
-import { NAV_ITEMS } from '../lib/nav'
+import { getNavItems } from '../lib/nav'
+import { useAuth } from '../auth/auth-context'
+import { LoginModal } from './LoginModal'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { ThemeToggle } from './ThemeToggle'
+import { useToast } from './toast-context'
 
 function linkClass(isActive: boolean) {
   if (isActive) {
@@ -15,7 +19,10 @@ function linkClass(isActive: boolean) {
 
 export function TopBar() {
   const { t } = useTranslation()
+  const { push } = useToast()
+  const { user, signOut } = useAuth()
   const [online, setOnline] = useState<boolean | null>(null)
+  const [loginOpen, setLoginOpen] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -30,6 +37,11 @@ export function TopBar() {
       active = false
     }
   }, [])
+
+  const handleSignOut = async () => {
+    await signOut()
+    push('info', t('auth.loggedOut'))
+  }
 
   return (
     <header className="sticky top-0 z-40 px-4 pt-3 md:px-8 lg:px-10">
@@ -47,7 +59,7 @@ export function TopBar() {
         </Link>
 
         <nav className="ml-2 hidden items-center gap-1 md:flex" aria-label="Main">
-          {NAV_ITEMS.map(({ to, key, icon: Icon, end }) => (
+          {getNavItems(!!user).map(({ to, key, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
@@ -77,8 +89,34 @@ export function TopBar() {
           <span className="h-5 w-px bg-stone-200/70 dark:bg-white/10" aria-hidden="true" />
           <LanguageSwitcher />
           <ThemeToggle />
+          <span className="h-5 w-px bg-stone-200/70 dark:bg-white/10" aria-hidden="true" />
+          {user ? (
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => void handleSignOut()}
+              title={t('auth.logout')}
+              aria-label={t('auth.logout')}
+            >
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden lg:inline">{user}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => setLoginOpen(true)}
+              title={t('auth.login')}
+              aria-label={t('auth.login')}
+            >
+              <LogIn className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden lg:inline">{t('auth.login')}</span>
+            </button>
+          )}
         </div>
       </div>
+
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </header>
   )
 }
