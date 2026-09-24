@@ -13,6 +13,7 @@ import { ErrorState } from '../components/ErrorState'
 import { Modal } from '../components/Modal'
 import { Spinner } from '../components/Spinner'
 import { StatusBadge } from '../components/StatusBadge'
+import { TagPill } from '../components/TagPill'
 import { useToast } from '../components/toast-context'
 
 function Cover({ coverPath, name }: { coverPath: string | null; name: string }) {
@@ -211,9 +212,7 @@ export function BookDetailPage() {
                 </dt>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {book.tags.map(({ tag }) => (
-                    <span key={tag.id} className="chip">
-                      {tag.name}
-                    </span>
+                    <TagPill key={tag.id} name={tag.name} size="sm" />
                   ))}
                 </div>
               </div>

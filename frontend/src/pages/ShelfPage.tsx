@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { createBook, listBooks, listTags, updateBook } from '../lib/api'
-import type { Book, BookFilters, BookInput, PaginatedBooks, TagWithCount } from '../lib/types'
+import type { Book, BookFilters, BookInput, FilterValues, PaginatedBooks, TagWithCount } from '../lib/types'
 import { useAuth } from '../auth/auth-context'
 import { BookCard } from '../components/BookCard'
 import { BookForm } from '../components/BookForm'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
-import { FilterBar, type FilterValues } from '../components/FilterBar'
+import { FilterControls } from '../components/FilterControls'
 import { Modal } from '../components/Modal'
 import { Pagination } from '../components/Pagination'
 import { Spinner } from '../components/Spinner'
@@ -22,7 +22,7 @@ export function ShelfPage() {
   const { push } = useToast()
   const { user } = useAuth()
 
-  const [filters, setFilters] = useState<FilterValues>(EMPTY_FILTERS)
+  const [baseFilters, setBaseFilters] = useState<FilterValues>(EMPTY_FILTERS)
   const [page, setPage] = useState(1)
   const [data, setData] = useState<PaginatedBooks | null>(null)
   const [loading, setLoading] = useState(true)
@@ -30,6 +30,12 @@ export function ShelfPage() {
   const [tags, setTags] = useState<TagWithCount[]>([])
   const [createOpen, setCreateOpen] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const name = searchParams.get('name') ?? ''
+  const filters: FilterValues = useMemo(
+    () => ({ ...baseFilters, name }),
+    [baseFilters, name],
+  )
 
   useEffect(() => {
     let active = true
@@ -89,48 +95,42 @@ export function ShelfPage() {
     }
   }
 
-  const handleNameChange = useCallback((name: string) => {
-    setLoading(true)
-    setData(null)
-    setLoadError(false)
-    setFilters((current) => ({ ...current, name }))
-    setPage(1)
-  }, [])
   const handleStatusChange = useCallback((status: string) => {
     setLoading(true)
     setData(null)
     setLoadError(false)
-    setFilters((current) => ({ ...current, status }))
+    setBaseFilters((current) => ({ ...current, status }))
     setPage(1)
   }, [])
   const handleTagChange = useCallback((tags: string[]) => {
     setLoading(true)
     setData(null)
     setLoadError(false)
-    setFilters((current) => ({ ...current, tags }))
+    setBaseFilters((current) => ({ ...current, tags }))
     setPage(1)
   }, [])
   const handleSortChange = useCallback((sort: string) => {
     setLoading(true)
     setData(null)
     setLoadError(false)
-    setFilters((current) => ({ ...current, sort }))
+    setBaseFilters((current) => ({ ...current, sort }))
     setPage(1)
   }, [])
   const handleOrderChange = useCallback((order: string) => {
     setLoading(true)
     setData(null)
     setLoadError(false)
-    setFilters((current) => ({ ...current, order }))
+    setBaseFilters((current) => ({ ...current, order }))
     setPage(1)
   }, [])
   const handleReset = useCallback(() => {
     setLoading(true)
     setData(null)
     setLoadError(false)
-    setFilters(EMPTY_FILTERS)
+    setBaseFilters(EMPTY_FILTERS)
     setPage(1)
-  }, [])
+    setSearchParams({}, { replace: true })
+  }, [setSearchParams])
 
   const handleRetry = useCallback(() => {
     setLoading(true)
@@ -156,25 +156,15 @@ export function ShelfPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="page-title">{t('books.title')}</h1>
-          <p className="page-subtitle">{t('books.shelfSubtitle')}</p>
-        </div>
-        <div className="flex gap-2">
-          {user ? (
-            <button type="button" className="btn-primary" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              {t('books.new')}
-            </button>
-          ) : null}
-        </div>
+      <div>
+        <h1 className="page-title">{t('books.title')}</h1>
+        <p className="page-subtitle">{t('books.shelfSubtitle')}</p>
       </div>
 
-      <FilterBar
+      <FilterControls
         filters={filters}
         tags={tags}
-        onNameChange={handleNameChange}
+        onCreate={user ? () => setCreateOpen(true) : undefined}
         onStatusChange={handleStatusChange}
         onTagChange={handleTagChange}
         onSortChange={handleSortChange}

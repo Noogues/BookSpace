@@ -85,7 +85,21 @@
       "name": "Name",
       "asc": "Ascending",
       "desc": "Descending",
+      "recent": "Recent",
+      "added": "Added",
+      "clearSearch": "Clear search",
+      "filters": "Filters",
+      "direction": "Direction",
+      "noTags": "No tags yet.",
+      "removeFilter": "Remove filter",
       "reset": "Clear filters"
+    },
+    "search": {
+      "title": "Search books",
+      "trigger": "Search",
+      "hint": "Type to search by name or secondary name.",
+      "noResults": "No matches.",
+      "applyFilter": "Filter by “{{query}}”"
     },
     "pagination": {
       "showing": "Showing {{from}}–{{to}} of {{total}}"
@@ -132,7 +146,9 @@
     "title": "Tags",
     "new": "New tag",
     "placeholder": "Tag name",
+    "searchPlaceholder": "Search tags…",
     "empty": "No tags yet.",
+    "noResults": "No tags match “{{query}}”.",
     "booksCount_one": "{{count}} book",
     "booksCount_other": "{{count}} books",
     "deleteTitle": "Delete tag",
