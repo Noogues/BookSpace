@@ -2,10 +2,11 @@ import { useState, type ChangeEvent, type FormEvent, type KeyboardEvent, useRef,
 import { useTranslation } from 'react-i18next'
 import { Ban, BookOpen, CheckCircle2, Clock, ImagePlus, Link as LinkIcon, Minus, Plus, Sparkles, Star, X } from 'lucide-react'
 import type { Book, BookInput } from '../lib/types'
-import { errorStatus, uploadCover } from '../lib/api'
+import { errorStatus, listTags, uploadCover } from '../lib/api'
 import { resolveCoverPath } from '../lib/format'
 import { useToast } from './toast-context'
 import { AddChaptersMenu } from './AddChaptersMenu'
+import { TagPill } from './TagPill'
 
 interface BookFormProps {
   initial?: Book | null
@@ -63,8 +64,15 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
   const [tagDraft, setTagDraft] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [uploading, setUploading] = useState(false)
+  const [existingTags, setExistingTags] = useState<string[]>([])
   const { push } = useToast()
   const previewRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    listTags()
+      .then((result) => setExistingTags(result.map((item) => item.name).sort()))
+      .catch(() => undefined)
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -401,17 +409,20 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
           <span className="label">{t('books.tags')}</span>
           <div className="flex flex-wrap items-center gap-2">
             {tags.map((tag) => (
-              <span key={tag} className="chip pr-1.5">
-                #{tag}
-                <button
-                  type="button"
-                  className="rounded-full p-0.5 text-stone-400 transition-colors hover:text-rose-500"
-                  onClick={() => setTags((current) => current.filter((item) => item !== tag))}
-                  aria-label={`${t('common.close')} ${tag}`}
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
+              <TagPill
+                key={tag}
+                name={`#${tag}`}
+                trailing={
+                  <button
+                    type="button"
+                    className="rounded-full p-0.5 text-stone-400 transition-colors hover:text-rose-500"
+                    onClick={() => setTags((current) => current.filter((item) => item !== tag))}
+                    aria-label={`${t('common.close')} ${tag}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                }
+              />
             ))}
             <div className="relative">
               <input
@@ -421,7 +432,13 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
                 onChange={(event) => setTagDraft(event.target.value)}
                 onKeyDown={handleTagKeyDown}
                 onBlur={() => addTag(tagDraft)}
+                list="book-tag-suggestions"
               />
+              <datalist id="book-tag-suggestions">
+                {existingTags.filter((name) => !tags.includes(name)).map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
               <button
                 type="button"
                 className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-teal-500 to-neon-sky text-white shadow-md shadow-teal-500/25 transition hover:scale-105 dark:from-neon-indigo dark:to-neon-sky dark:text-ink-950"

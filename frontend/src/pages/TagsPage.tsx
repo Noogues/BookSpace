@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Tag as TagIcon, Trash2 } from 'lucide-react'
+import { Plus, Search, Tag as TagIcon, Trash2 } from 'lucide-react'
 import { createTag, deleteTag, listTags } from '../lib/api'
 import type { TagWithCount } from '../lib/types'
 import { useAuth } from '../auth/auth-context'
@@ -22,6 +22,7 @@ export function TagsPage() {
   const [creating, setCreating] = useState(false)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [deletingName, setDeletingName] = useState('')
+  const [query, setQuery] = useState('')
 
   const loadTags = useCallback(async () => {
     return listTags()
@@ -84,6 +85,8 @@ export function TagsPage() {
     }
   }
 
+  const filteredTags = tags.filter((tag) => tag.name.toLowerCase().includes(query.trim().toLowerCase()))
+
   return (
     <div className="space-y-6">
       <div>
@@ -117,15 +120,34 @@ export function TagsPage() {
         </form>
       ) : null}
 
+      {tags.length > 0 ? (
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 dark:text-stone-500"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            className="input pl-10"
+            placeholder={t('tags.searchPlaceholder')}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            aria-label={t('tags.searchPlaceholder')}
+          />
+        </div>
+      ) : null}
+
       {loading ? (
         <Spinner label={t('common.loading')} />
       ) : error ? (
         <ErrorState message={t('errors.loadTags')} onRetry={fetchTags} />
       ) : tags.length === 0 ? (
         <EmptyState message={t('tags.empty')} icon={TagIcon} />
+      ) : filteredTags.length === 0 ? (
+        <EmptyState message={t('tags.noResults', { query })} icon={TagIcon} />
       ) : (
         <ul className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
+          {filteredTags.map((tag) => (
             <li
               key={tag.id}
               className="glass group flex max-w-full items-center gap-2 px-3 py-2 transition-all duration-300 hover:-translate-y-0.5 hover:border-neon-indigo/50 hover:shadow-xl hover:shadow-neon-indigo/10 dark:hover:border-neon-indigo/50"

@@ -79,7 +79,27 @@
       "namePlaceholder": "Buscar por nombre…",
       "status": "Estado",
       "tag": "Etiqueta",
+      "sort": "Orden",
+      "recentlyUpdated": "Recientemente actualizado",
+      "dateAdded": "Fecha de entrada",
+      "name": "Nombre",
+      "asc": "Ascendente",
+      "desc": "Descendente",
+      "recent": "Recientes",
+      "added": "Añadidos",
+      "clearSearch": "Limpiar búsqueda",
+      "filters": "Filtros",
+      "direction": "Dirección",
+      "noTags": "No hay etiquetas todavía.",
+      "removeFilter": "Quitar filtro",
       "reset": "Limpiar filtros"
+    },
+    "search": {
+      "title": "Buscar libros",
+      "trigger": "Buscar",
+      "hint": "Escribe para buscar por nombre o nombre alternativo.",
+      "noResults": "Sin coincidencias.",
+      "applyFilter": "Filtrar por «{{query}}»"
     },
     "pagination": {
       "showing": "Mostrando {{from}}–{{to}} de {{total}}"
@@ -126,7 +146,9 @@
     "title": "Etiquetas",
     "new": "Nueva etiqueta",
     "placeholder": "Nombre de la etiqueta",
+    "searchPlaceholder": "Buscar etiquetas…",
     "empty": "No hay etiquetas todavía.",
+    "noResults": "No hay etiquetas que coincidan con «{{query}}».",
     "booksCount_one": "{{count}} libro",
     "booksCount_other": "{{count}} libros",
     "deleteTitle": "Eliminar etiqueta",

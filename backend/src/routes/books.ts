@@ -38,6 +38,8 @@ const listQuerySchema = z.object({
   name: z.string().trim().min(1).optional(),
   status: z.coerce.number().int().min(0).max(3).optional(),
   tag: z.union([z.string(), z.array(z.string())]).optional(),
+  sort: z.enum(['updated', 'added', 'name']).default('updated'),
+  order: z.enum(['asc', 'desc']).default('desc'),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 })
@@ -66,7 +68,7 @@ export async function booksRoutes(
   const dir = opts.coversDir
 
   app.get('/books', async (request) => {
-    const { name, status, tag, page, pageSize } = listQuerySchema.parse(request.query)
+    const { name, status, tag, sort, order, page, pageSize } = listQuerySchema.parse(request.query)
 
     const tagList = (Array.isArray(tag) ? tag : tag ? [tag] : [])
       .map((value) => value.trim())
@@ -80,11 +82,18 @@ export async function booksRoutes(
         : {}),
     }
 
+    const orderBy: Prisma.BookOrderByWithRelationInput =
+      sort === 'name'
+        ? { name: order }
+        : sort === 'added'
+          ? { createdAt: order }
+          : { updateAt: order }
+
     const [total, items] = await Promise.all([
       prisma.book.count({ where }),
       prisma.book.findMany({
         where,
-        orderBy: { updateAt: 'desc' },
+        orderBy,
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: bookInclude,

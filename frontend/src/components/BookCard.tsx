@@ -6,6 +6,7 @@ import type { Book } from '../lib/types'
 import { formatRating, resolveCoverPath } from '../lib/format'
 import { StatusBadge } from './StatusBadge'
 import { AddChaptersMenu } from './AddChaptersMenu'
+import { TagPill } from './TagPill'
 
 function Cover({ coverPath, name }: { coverPath: string | null; name: string }) {
   const { t } = useTranslation()
@@ -105,17 +106,10 @@ export function BookCard({ book, onAdvance }: BookCardProps) {
       {book.tags.length > 0 ? (
         <div className="flex flex-wrap gap-1.5 px-2 pt-2 pb-1">
           {book.tags.slice(0, 3).map(({ tag }) => (
-            <span
-              key={tag.id}
-              className="chip"
-            >
-              {tag.name}
-            </span>
+            <TagPill key={tag.id} name={tag.name} size="sm" />
           ))}
           {book.tags.length > 3 ? (
-            <span className="chip">
-              +{book.tags.length - 3}
-            </span>
+            <TagPill name={`+${book.tags.length - 3}`} size="sm" />
           ) : null}
         </div>
       ) : null}
