@@ -39,6 +39,8 @@ export interface BookFilters {
   name?: string
   status?: number
   tag?: string[]
+  sort?: 'updated' | 'added' | 'name'
+  order?: 'asc' | 'desc'
   page?: number
   pageSize?: number
 }

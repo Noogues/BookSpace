@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Search, X } from 'lucide-react'
 import type { TagWithCount } from '../lib/types'
 
 export interface FilterValues {
   name: string
   status: string
   tags: string[]
+  sort: string
+  order: string
 }
 
 interface FilterBarProps {
@@ -15,8 +17,16 @@ interface FilterBarProps {
   onNameChange: (name: string) => void
   onStatusChange: (status: string) => void
   onTagChange: (tags: string[]) => void
+  onSortChange: (sort: string) => void
+  onOrderChange: (order: string) => void
   onReset: () => void
 }
+
+const SORT_OPTIONS: { value: string; labelKey: string }[] = [
+  { value: 'updated', labelKey: 'books.filters.recentlyUpdated' },
+  { value: 'added', labelKey: 'books.filters.dateAdded' },
+  { value: 'name', labelKey: 'books.filters.name' },
+]
 
 export function FilterBar({
   filters,
@@ -24,6 +34,8 @@ export function FilterBar({
   onNameChange,
   onStatusChange,
   onTagChange,
+  onSortChange,
+  onOrderChange,
   onReset,
 }: FilterBarProps) {
   const { t } = useTranslation()
@@ -36,7 +48,8 @@ export function FilterBar({
     return () => window.clearTimeout(id)
   }, [draft, filters.name, onNameChange])
 
-  const hasFilters = filters.name !== '' || filters.status !== '' || filters.tags.length > 0
+  const hasFilters =
+    filters.name !== '' || filters.status !== '' || filters.tags.length > 0 || filters.sort !== 'updated' || filters.order !== 'desc'
 
   const handleReset = () => {
     setDraft('')
@@ -61,6 +74,36 @@ export function FilterBar({
       </div>
 
       <div className="space-y-4">
+        <div>
+          <p className="filter-heading">{t('books.filters.sort')}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label={t('books.filters.sort')}>
+            {SORT_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onSortChange(filters.sort === option.value ? 'updated' : option.value)}
+                className={filters.sort === option.value ? 'chip chip-active' : 'chip'}
+              >
+                {t(option.labelKey)}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => onOrderChange(filters.order === 'desc' ? 'asc' : 'desc')}
+              className="chip border-teal-400/40 text-teal-600 dark:text-neon-teal"
+              aria-label={t(`books.filters.${filters.order}`)}
+              title={t(`books.filters.${filters.order}`)}
+            >
+              {filters.order === 'asc' ? (
+                <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
+              ) : (
+                <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              {t(`books.filters.${filters.order}`)}
+            </button>
+          </div>
+        </div>
+
         <div>
           <p className="filter-heading">{t('books.filters.status')}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label={t('books.filters.status')}>

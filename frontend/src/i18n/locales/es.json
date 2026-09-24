@@ -79,6 +79,12 @@
       "namePlaceholder": "Buscar por nombre…",
       "status": "Estado",
       "tag": "Etiqueta",
+      "sort": "Orden",
+      "recentlyUpdated": "Recientemente actualizado",
+      "dateAdded": "Fecha de entrada",
+      "name": "Nombre",
+      "asc": "Ascendente",
+      "desc": "Descendente",
       "reset": "Limpiar filtros"
     },
     "pagination": {

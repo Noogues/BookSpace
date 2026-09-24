@@ -79,6 +79,12 @@
       "namePlaceholder": "Search by name…",
       "status": "Status",
       "tag": "Tag",
+      "sort": "Sort",
+      "recentlyUpdated": "Recently updated",
+      "dateAdded": "Date added",
+      "name": "Name",
+      "asc": "Ascending",
+      "desc": "Descending",
       "reset": "Clear filters"
     },
     "pagination": {

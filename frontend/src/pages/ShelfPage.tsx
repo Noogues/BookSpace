@@ -15,7 +15,7 @@ import { Spinner } from '../components/Spinner'
 import { useToast } from '../components/toast-context'
 
 const PAGE_SIZE = 18
-const EMPTY_FILTERS: FilterValues = { name: '', status: '', tags: [] }
+const EMPTY_FILTERS: FilterValues = { name: '', status: '', tags: [], sort: 'updated', order: 'desc' }
 
 export function ShelfPage() {
   const { t } = useTranslation()
@@ -48,6 +48,8 @@ export function ShelfPage() {
     if (filters.name) params.name = filters.name
     if (filters.status) params.status = Number(filters.status)
     if (filters.tags.length > 0) params.tag = filters.tags
+    params.sort = filters.sort as BookFilters['sort']
+    params.order = filters.order as BookFilters['order']
     return listBooks(params)
   }, [filters, page])
 
@@ -108,6 +110,20 @@ export function ShelfPage() {
     setFilters((current) => ({ ...current, tags }))
     setPage(1)
   }, [])
+  const handleSortChange = useCallback((sort: string) => {
+    setLoading(true)
+    setData(null)
+    setLoadError(false)
+    setFilters((current) => ({ ...current, sort }))
+    setPage(1)
+  }, [])
+  const handleOrderChange = useCallback((order: string) => {
+    setLoading(true)
+    setData(null)
+    setLoadError(false)
+    setFilters((current) => ({ ...current, order }))
+    setPage(1)
+  }, [])
   const handleReset = useCallback(() => {
     setLoading(true)
     setData(null)
@@ -161,6 +177,8 @@ export function ShelfPage() {
         onNameChange={handleNameChange}
         onStatusChange={handleStatusChange}
         onTagChange={handleTagChange}
+        onSortChange={handleSortChange}
+        onOrderChange={handleOrderChange}
         onReset={handleReset}
       />
 
