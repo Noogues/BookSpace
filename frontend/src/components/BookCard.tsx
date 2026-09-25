@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react'
+import { useCallback, useState, type PointerEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { BookOpen, Star } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +8,7 @@ import { StatusBadge } from './StatusBadge'
 import { AddChaptersMenu } from './AddChaptersMenu'
 import { TagPill } from './TagPill'
 
-function Cover({ coverPath, name }: { coverPath: string | null; name: string }) {
+function Cover({ coverPath, name, disableHoverScale = false }: { coverPath: string | null; name: string; disableHoverScale?: boolean }) {
   const { t } = useTranslation()
   const [broken, setBroken] = useState(false)
 
@@ -30,7 +30,7 @@ function Cover({ coverPath, name }: { coverPath: string | null; name: string }) 
       loading="lazy"
       referrerPolicy="no-referrer"
       decoding="async"
-      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+      className={`h-full w-full object-cover ${disableHoverScale ? 'scale-100 transition-none' : 'transition-transform duration-500 group-hover:scale-110'}`}
       onError={() => setBroken(true)}
     />
   )
@@ -39,12 +39,25 @@ function Cover({ coverPath, name }: { coverPath: string | null; name: string }) 
 interface BookCardProps {
   book: Book
   onAdvance?: (book: Book, amount: number) => void
+  disableHoverEffects?: boolean
+  onChaptersMenuOpenChange?: (open: boolean) => void
 }
 
-export function BookCard({ book, onAdvance }: BookCardProps) {
+export function BookCard({ book, onAdvance, disableHoverEffects = false, onChaptersMenuOpenChange }: BookCardProps) {
   const { t } = useTranslation()
+  const [chaptersMenuOpen, setChaptersMenuOpen] = useState(false)
+  const coverHoverDisabled = disableHoverEffects || chaptersMenuOpen
 
-  const handleMove = (event: MouseEvent<HTMLDivElement>) => {
+  const handleChaptersMenuOpenChange = useCallback(
+    (open: boolean) => {
+      setChaptersMenuOpen(open)
+      onChaptersMenuOpenChange?.(open)
+    },
+    [onChaptersMenuOpenChange],
+  )
+
+  const handleMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (disableHoverEffects || event.pointerType !== 'mouse') return
     const el = event.currentTarget
     const rect = el.getBoundingClientRect()
     const px = (event.clientX - rect.left) / rect.width - 0.5
@@ -53,31 +66,43 @@ export function BookCard({ book, onAdvance }: BookCardProps) {
     el.style.setProperty('--ry', `${(px * 11).toFixed(2)}deg`)
   }
 
-  const handleLeave = (event: MouseEvent<HTMLDivElement>) => {
+  const handleLeave = (event: PointerEvent<HTMLDivElement>) => {
     event.currentTarget.style.setProperty('--rx', '0deg')
     event.currentTarget.style.setProperty('--ry', '0deg')
   }
 
   return (
     <div
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
+      onPointerMove={handleMove}
+      onPointerLeave={handleLeave}
       style={{ transform: 'perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))' }}
-      className="group relative overflow-hidden rounded-2xl border border-stone-200/70 bg-white/80 shadow-lg shadow-stone-900/5 backdrop-blur-2xl transition-[transform,box-shadow,border-color] duration-200 ease-out will-change-transform animate-fade-up hover:border-neon-sky/50 hover:shadow-2xl hover:shadow-teal-500/15 dark:border-white/10 dark:bg-white/5 dark:hover:border-neon-indigo/50 dark:hover:shadow-[0_18px_50px_-12px_rgba(129,140,248,0.3)]"
+      className={`group relative ${chaptersMenuOpen ? 'z-20' : 'z-0'} min-w-0 rounded-2xl border border-stone-200/70 bg-white/80 shadow-lg shadow-stone-900/5 backdrop-blur-2xl transition-[transform,box-shadow,border-color] duration-200 ease-out will-change-transform animate-fade-up ${
+        disableHoverEffects
+          ? 'hover:z-0'
+          : 'hover:z-20 hover:border-neon-sky/50 hover:shadow-2xl hover:shadow-teal-500/15'
+      } focus-within:z-20 motion-reduce:transition-none dark:border-white/10 dark:bg-white/5 ${
+        disableHoverEffects
+          ? ''
+          : 'dark:hover:border-neon-indigo/50 dark:hover:shadow-[0_18px_50px_-12px_rgba(129,140,248,0.3)]'
+      }`}
     >
       <Link
         to={`/books/${book.id}`}
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+        className="block min-w-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
       >
-        <div className="relative aspect-2/3 w-full overflow-hidden bg-stone-200 dark:bg-ink-800">
-          <Cover coverPath={book.coverPath} name={book.name} />
+        <div className="relative aspect-2/3 w-full overflow-hidden rounded-t-2xl bg-stone-200 dark:bg-ink-800">
+          <Cover coverPath={book.coverPath} name={book.name} disableHoverScale={coverHoverDisabled} />
 
-          <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+          <div
+            className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
+              coverHoverDisabled ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'
+            }`}
+          >
             <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/10 to-white/5 dark:via-neon-indigo/10 dark:to-neon-teal/5" />
           </div>
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-stone-950/90 via-stone-950/40 to-transparent p-3 pt-14">
-            <h3 className="font-display text-base font-semibold leading-snug text-white">
+            <h3 className="line-clamp-2 break-words font-display text-base font-semibold leading-snug text-white">
               {book.name}
             </h3>
             {book.secundaryName ? (
@@ -119,6 +144,7 @@ export function BookCard({ book, onAdvance }: BookCardProps) {
           <AddChaptersMenu
             iconOnly
             align="right"
+            onOpenChange={handleChaptersMenuOpenChange}
             onAdd={(amount) => onAdvance(book, amount)}
           />
         </div>

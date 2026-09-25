@@ -29,7 +29,7 @@ export function Pagination({ page, total, pageSize, onPageChange }: PaginationPr
     <button
       key={pageNumber}
       type="button"
-      className={`h-9 min-w-9 rounded-full px-2 text-sm font-medium transition-all duration-200 ${
+      className={`h-11 min-w-11 rounded-full px-2 text-sm font-medium transition-all duration-200 sm:h-9 sm:min-w-9 ${
         pageNumber === page
           ? 'bg-gradient-to-r from-teal-500 to-neon-sky text-white shadow-lg shadow-teal-500/30 dark:from-neon-indigo dark:to-neon-sky dark:text-ink-950 dark:shadow-neon-indigo/30'
           : 'text-stone-600 hover:bg-white/70 hover:shadow-md dark:text-stone-300 dark:hover:bg-white/[0.07]'
@@ -42,14 +42,14 @@ export function Pagination({ page, total, pageSize, onPageChange }: PaginationPr
   )
 
   return (
-    <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+    <div className="flex min-w-0 flex-col items-center gap-2 sm:flex-row sm:justify-between">
       <p className="text-xs text-stone-500 dark:text-stone-400">
         {t('books.pagination.showing', { from, to, total })}
       </p>
-      <div className="flex items-center gap-1">
+      <div className="flex max-w-full items-center gap-1 overflow-x-auto pb-1 sm:justify-center">
         <button
           type="button"
-          className="btn-ghost h-8 w-8 px-0"
+          className="btn-ghost h-11 w-11 px-0 sm:h-8 sm:w-8"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
           aria-label="Previous page"
@@ -71,7 +71,7 @@ export function Pagination({ page, total, pageSize, onPageChange }: PaginationPr
         ) : null}
         <button
           type="button"
-          className="btn-ghost h-8 w-8 px-0"
+          className="btn-ghost h-11 w-11 px-0 sm:h-8 sm:w-8"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
           aria-label="Next page"

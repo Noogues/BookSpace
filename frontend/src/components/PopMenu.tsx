@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 
 interface PopMenuProps {
@@ -9,6 +9,7 @@ interface PopMenuProps {
   onOpenChange: (open: boolean) => void
   children: ReactNode
   widthClassName?: string
+  buttonClassName?: string
 }
 
 export function PopMenu({
@@ -19,21 +20,56 @@ export function PopMenu({
   onOpenChange,
   children,
   widthClassName = 'w-72',
+  buttonClassName = '',
 }: PopMenuProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const [placement, setPlacement] = useState<{
+    align: 'left' | 'right'
+    side: 'top' | 'bottom'
+  }>({ align: 'left', side: 'bottom' })
+
+  useLayoutEffect(() => {
+    if (!open) return
+    const updatePlacement = () => {
+      const container = ref.current
+      if (!container) return
+      const rect = container.getBoundingClientRect()
+      const menu = container.querySelector('[role="menu"]')
+      const menuWidth = menu?.getBoundingClientRect().width ?? 288
+      const menuHeight = menu?.getBoundingClientRect().height ?? 320
+      const align =
+        rect.left + menuWidth > window.innerWidth - 12 && rect.left > window.innerWidth - rect.right
+          ? 'right'
+          : 'left'
+      const side =
+        window.innerHeight - rect.bottom < Math.min(menuHeight, 320) && rect.top > window.innerHeight - rect.bottom
+          ? 'top'
+          : 'bottom'
+      setPlacement((current) =>
+        current.align === align && current.side === side ? current : { align, side },
+      )
+    }
+    updatePlacement()
+    window.addEventListener('resize', updatePlacement)
+    window.addEventListener('scroll', updatePlacement, true)
+    return () => {
+      window.removeEventListener('resize', updatePlacement)
+      window.removeEventListener('scroll', updatePlacement, true)
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
-    const onPointerDown = (event: MouseEvent) => {
+    const onPointerDown = (event: PointerEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) onOpenChange(false)
     }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onOpenChange(false)
     }
-    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('pointerdown', onPointerDown)
     document.addEventListener('keydown', onKeyDown)
     return () => {
-      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('pointerdown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [open, onOpenChange])
@@ -41,15 +77,15 @@ export function PopMenu({
   const highlighted = open || active
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative min-w-0" ref={ref}>
       <button
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => onOpenChange(!open)}
-        className={highlighted ? 'hud-btn hud-btn-active' : 'hud-btn'}
+        className={`${highlighted ? 'hud-btn hud-btn-active' : 'hud-btn'} ${buttonClassName}`}
       >
-        <span className="max-w-40 truncate">{label}</span>
+        <span className="min-w-0 max-w-40 truncate">{label}</span>
         {badge !== undefined && badge > 0 ? (
           <span className="grid h-4 min-w-4 shrink-0 place-items-center rounded bg-teal-500 px-1 text-[10px] font-bold text-white dark:bg-neon-teal dark:text-ink-950">
             {badge}
@@ -64,7 +100,9 @@ export function PopMenu({
       {open ? (
         <div
           role="menu"
-          className={`glass-strong absolute left-0 top-full z-10 mt-2 ${widthClassName} max-h-80 overflow-auto rounded-xl p-2 animate-pop`}
+          className={`glass-strong absolute z-10 max-h-[min(20rem,calc(100svh-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-auto rounded-xl p-2 animate-pop ${widthClassName} ${
+            placement.align === 'right' ? 'right-0' : 'left-0'
+          } ${placement.side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}`}
         >
           {children}
         </div>

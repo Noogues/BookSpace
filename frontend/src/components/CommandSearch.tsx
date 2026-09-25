@@ -96,15 +96,15 @@ export function CommandSearch({ onClose, onApplyName }: CommandSearchProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-40 flex justify-center bg-ink-950/50 p-4 pt-[12vh] backdrop-blur-md animate-fade-up"
+      className="fixed inset-0 z-40 flex justify-center bg-ink-950/50 p-3 pt-[8vh] backdrop-blur-md animate-fade-up sm:p-4 sm:pt-[12vh]"
       role="dialog"
       aria-modal="true"
       aria-label={t('books.search.title')}
-      onMouseDown={(event) => {
+      onPointerDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      <div className="glass-strong h-fit w-full max-w-xl overflow-hidden rounded-2xl animate-pop">
+      <div className="glass-strong h-fit max-h-[calc(100dvh-1.5rem)] w-full max-w-xl overflow-hidden rounded-2xl animate-pop">
         <div className="flex items-center gap-3 border-b border-stone-200/60 px-4 dark:border-white/10">
           <Search
             className="h-5 w-5 shrink-0 text-stone-400 dark:text-stone-500"
@@ -125,7 +125,7 @@ export function CommandSearch({ onClose, onApplyName }: CommandSearchProps) {
           </kbd>
         </div>
 
-        <div className="max-h-[50vh] overflow-y-auto p-2">
+        <div className="max-h-[60dvh] overflow-y-auto p-2">
           {hasQuery ? (
             <button
               type="button"

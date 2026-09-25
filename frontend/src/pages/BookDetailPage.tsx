@@ -134,17 +134,17 @@ export function BookDetailPage() {
 
       <div className="glass relative overflow-hidden animate-fade-up">
         <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon-teal/60 to-transparent" />
-        <div className="grid gap-6 p-6 sm:grid-cols-[220px_1fr]">
-          <div>
+        <div className="grid gap-6 p-4 sm:grid-cols-[220px_1fr] sm:p-6">
+          <div className="mx-auto w-full max-w-48 sm:mx-0 sm:max-w-none">
             <Cover coverPath={book.coverPath} name={book.name} />
           </div>
 
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h1 className="page-title">{book.name}</h1>
+              <div className="min-w-0">
+                <h1 className="page-title break-words">{book.name}</h1>
                 {book.secundaryName ? (
-                  <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">
+                  <p className="mt-0.5 break-words text-sm text-stone-500 dark:text-stone-400">
                     {book.secundaryName}
                   </p>
                 ) : null}
@@ -152,8 +152,8 @@ export function BookDetailPage() {
               <StatusBadge status={book.status} />
             </div>
 
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
-              <div>
+            <dl className="grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
+              <div className="min-w-0">
                 <dt className="font-medium text-stone-500 dark:text-stone-400">
                   {t('books.lastChapter')}
                 </dt>
@@ -161,7 +161,7 @@ export function BookDetailPage() {
                   {book.lastChapter}
                 </dd>
               </div>
-              <div>
+              <div className="min-w-0">
                 <dt className="font-medium text-stone-500 dark:text-stone-400">
                   {t('books.rating')}
                 </dt>
@@ -169,7 +169,7 @@ export function BookDetailPage() {
                   {book.rating > 0 ? `★ ${formatRating(book.rating)}` : '—'}
                 </dd>
               </div>
-              <div>
+              <div className="min-w-0">
                 <dt className="font-medium text-stone-500 dark:text-stone-400">
                   {t('books.url')}
                 </dt>
@@ -178,26 +178,26 @@ export function BookDetailPage() {
                     href={book.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-teal-700 hover:text-teal-600 hover:underline dark:text-teal-400"
+                    className="inline-flex max-w-full items-center gap-1 break-all text-teal-700 hover:text-teal-600 hover:underline dark:text-teal-400"
                   >
                     {book.url.length > 40 ? `${book.url.slice(0, 40)}…` : book.url}
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </a>
                 </dd>
               </div>
-              <div>
+              <div className="min-w-0">
                 <dt className="font-medium text-stone-500 dark:text-stone-400">
                   {t('books.completedAt')}
                 </dt>
                 <dd className="mt-0.5">{formatDate(book.completedAt, i18n.resolvedLanguage ?? 'es')}</dd>
               </div>
-              <div>
+              <div className="min-w-0">
                 <dt className="font-medium text-stone-500 dark:text-stone-400">
                   {t('books.createdAt')}
                 </dt>
                 <dd className="mt-0.5">{formatDate(book.createdAt, i18n.resolvedLanguage ?? 'es')}</dd>
               </div>
-              <div>
+              <div className="min-w-0">
                 <dt className="font-medium text-stone-500 dark:text-stone-400">
                   {t('books.updatedAt')}
                 </dt>
@@ -206,7 +206,7 @@ export function BookDetailPage() {
             </dl>
 
             {book.tags.length > 0 ? (
-              <div>
+              <div className="min-w-0">
                 <dt className="text-sm font-medium text-stone-500 dark:text-stone-400">
                   {t('books.tags')}
                 </dt>
@@ -218,7 +218,7 @@ export function BookDetailPage() {
               </div>
             ) : null}
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               {user ? (
                 <>
                   <button type="button" className="btn-secondary" onClick={() => setEditOpen(true)}>

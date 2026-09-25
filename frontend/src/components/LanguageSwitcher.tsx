@@ -17,7 +17,7 @@ export function LanguageSwitcher() {
 
   useEffect(() => {
     if (!open) return
-    const onPointerDown = (event: MouseEvent) => {
+    const onPointerDown = (event: PointerEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpen(false)
       }
@@ -25,10 +25,10 @@ export function LanguageSwitcher() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpen(false)
     }
-    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('pointerdown', onPointerDown)
     document.addEventListener('keydown', onKeyDown)
     return () => {
-      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('pointerdown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [open])
@@ -39,7 +39,7 @@ export function LanguageSwitcher() {
   }
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative shrink-0" ref={containerRef}>
       <button
         type="button"
         aria-haspopup="menu"
@@ -47,7 +47,7 @@ export function LanguageSwitcher() {
         aria-label={current.label}
         title={current.label}
         onClick={() => setOpen((value) => !value)}
-        className={`inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-sm font-medium text-stone-400 transition-colors hover:bg-stone-900/5 hover:text-stone-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 dark:text-stone-500 dark:hover:bg-white/5 dark:hover:text-stone-200 ${
+        className={`inline-flex h-11 items-center gap-1.5 rounded-full px-2.5 text-sm font-medium text-stone-400 transition-colors hover:bg-stone-900/5 hover:text-stone-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 sm:h-9 dark:text-stone-500 dark:hover:bg-white/5 dark:hover:text-stone-200 ${
           open ? 'bg-stone-900/5 text-stone-700 dark:bg-white/5 dark:text-stone-200' : ''
         }`}
       >
@@ -59,7 +59,7 @@ export function LanguageSwitcher() {
       {open ? (
         <div
           role="menu"
-          className="glass-strong absolute right-0 top-full z-30 mt-2 w-44 p-2 animate-pop"
+          className="glass-strong absolute right-0 top-full z-30 mt-2 w-44 max-w-[calc(100vw-1.5rem)] p-2 animate-pop"
         >
           <p className="mb-1.5 px-2 pt-1 text-[11px] font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400">
             {t('common.language')}
@@ -69,7 +69,7 @@ export function LanguageSwitcher() {
               key={lang.code}
               type="button"
               role="menuitem"
-              className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors ${
+              className={`flex min-h-11 w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
                 lang.code === current.code
                   ? 'font-semibold text-teal-700 dark:text-neon-teal'
                   : 'text-stone-600 hover:bg-stone-900/5 dark:text-stone-300 dark:hover:bg-white/5'

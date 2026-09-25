@@ -46,12 +46,12 @@ function Shell() {
   }, [])
 
   return (
-    <div className="relative min-h-svh">
+    <div className="relative min-h-svh min-w-0">
       <AmbientBackground />
       <MobileDock />
-      <div className="relative z-10 flex min-h-svh flex-col">
+      <div className="relative z-10 flex min-h-svh min-w-0 flex-col">
         <TopBar onSearchClick={() => setSearchOpen(true)} />
-        <main className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-4 py-6 pb-28 md:px-8 md:pb-8 lg:px-10">
+        <main className="mx-auto flex w-full min-w-0 max-w-[1600px] flex-1 flex-col px-4 py-6 pb-28 md:px-8 md:pb-8 lg:px-10">
           <Routes>
             <Route path="/" element={<ShelfPage />} />
             <Route path="/shelf" element={<Navigate to="/" replace />} />

@@ -29,6 +29,7 @@ export function ShelfPage() {
   const [loadError, setLoadError] = useState(false)
   const [tags, setTags] = useState<TagWithCount[]>([])
   const [createOpen, setCreateOpen] = useState(false)
+  const [chaptersMenuOpen, setChaptersMenuOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
   const name = searchParams.get('name') ?? ''
@@ -178,11 +179,13 @@ export function ShelfPage() {
         <ErrorState message={t('errors.loadBooks')} onRetry={handleRetry} />
       ) : data && data.items.length > 0 ? (
         <>
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
             {data.items.map((book) => (
               <BookCard
                 key={book.id}
                 book={book}
+                disableHoverEffects={chaptersMenuOpen}
+                onChaptersMenuOpenChange={setChaptersMenuOpen}
                 onAdvance={
                   user
                     ? (target, amount) => void handleAdvance(target, amount)
