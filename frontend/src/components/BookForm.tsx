@@ -245,7 +245,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-stone-200/80 text-stone-500 transition hover:border-teal-400 hover:text-teal-600 dark:border-white/10 dark:text-stone-400 dark:hover:border-neon-indigo/60 dark:hover:text-neon-indigo"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-stone-200/80 text-stone-500 transition hover:border-teal-400 hover:text-teal-600 sm:h-10 sm:w-10 dark:border-white/10 dark:text-stone-400 dark:hover:border-neon-indigo/60 dark:hover:text-neon-indigo"
                   onClick={() => bumpChapter(-1)}
                   aria-label="−1"
                 >
@@ -256,13 +256,13 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
                   type="number"
                   min={0}
                   step={1}
-                  className="input text-center font-semibold"
+                  className="input min-w-0 flex-1 text-center font-semibold"
                   value={lastChapter}
                   onChange={(event) => setLastChapter(event.target.value)}
                 />
                 <button
                   type="button"
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-teal-500 to-neon-sky text-white shadow-md shadow-teal-500/30 transition hover:scale-105 dark:from-neon-indigo dark:to-neon-sky dark:text-ink-950 dark:shadow-neon-indigo/30"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-teal-500 to-neon-sky text-white shadow-md shadow-teal-500/30 transition hover:scale-105 sm:h-10 sm:w-10 dark:from-neon-indigo dark:to-neon-sky dark:text-ink-950 dark:shadow-neon-indigo/30"
                   onClick={() => bumpChapter(1)}
                   aria-label="+1"
                 >
@@ -299,7 +299,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
                     role="radio"
                     aria-checked={active}
                     onClick={() => setStatus(String(value))}
-                    className={`inline-flex items-center justify-center gap-1.5 rounded-xl border px-2.5 py-2.5 text-xs font-semibold transition-all duration-200 ${
+                    className={`inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border px-2.5 py-2.5 text-xs font-semibold transition-all duration-200 ${
                       active
                         ? 'border-transparent bg-gradient-to-br from-teal-500 to-neon-sky text-white shadow-lg shadow-teal-500/30 dark:from-neon-indigo dark:to-neon-sky dark:text-ink-950 dark:shadow-neon-indigo/30'
                         : 'border-stone-200/80 text-stone-500 hover:border-stone-300 hover:bg-white/60 hover:text-stone-800 dark:border-white/10 dark:text-stone-400 dark:hover:border-white/25 dark:hover:bg-white/[0.05] dark:hover:text-stone-200'
@@ -415,7 +415,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
                 trailing={
                   <button
                     type="button"
-                    className="rounded-full p-0.5 text-stone-400 transition-colors hover:text-rose-500"
+                    className="grid h-11 w-11 place-items-center rounded-full text-stone-400 transition-colors hover:bg-rose-500/10 hover:text-rose-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 sm:h-6 sm:w-6"
                     onClick={() => setTags((current) => current.filter((item) => item !== tag))}
                     aria-label={`${t('common.close')} ${tag}`}
                   >
@@ -424,9 +424,9 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
                 }
               />
             ))}
-            <div className="relative">
+            <div className="relative min-w-0 flex-1 basis-44 sm:w-44 sm:flex-none">
               <input
-                className="input h-9 w-44 pr-9 text-xs"
+                className="input h-11 w-full pr-11 text-base sm:h-9 sm:text-sm"
                 placeholder={t('books.addTag')}
                 value={tagDraft}
                 onChange={(event) => setTagDraft(event.target.value)}
@@ -441,7 +441,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
               </datalist>
               <button
                 type="button"
-                className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-teal-500 to-neon-sky text-white shadow-md shadow-teal-500/25 transition hover:scale-105 dark:from-neon-indigo dark:to-neon-sky dark:text-ink-950"
+                className="absolute right-0 top-0 grid h-11 w-11 place-items-center rounded-r-xl bg-gradient-to-br from-teal-500 to-neon-sky text-white shadow-md shadow-teal-500/25 transition hover:scale-105 sm:right-1 sm:top-1 sm:h-7 sm:w-7 sm:rounded-lg dark:from-neon-indigo dark:to-neon-sky dark:text-ink-950"
                 onClick={() => addTag(tagDraft)}
                 aria-label={t('books.tags')}
               >
@@ -452,7 +452,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
         </div>
       </div>
 
-      <div className="mt-6 flex justify-end gap-2">
+      <div className="mt-6 flex flex-wrap justify-end gap-2">
         <button type="submit" className="btn-primary" disabled={submitting}>
           {submitting ? null : <Sparkles className="h-4 w-4" aria-hidden="true" />}
           {submitting ? t('common.saving') : t('common.save')}

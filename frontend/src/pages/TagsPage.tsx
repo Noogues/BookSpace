@@ -162,7 +162,7 @@ export function TagsPage() {
               {user ? (
                 <button
                   type="button"
-                  className="ml-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-stone-400 transition hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-300"
+                  className="ml-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full text-stone-400 transition hover:bg-rose-500/10 hover:text-rose-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 sm:h-7 sm:w-7 dark:hover:text-rose-300"
                   onClick={() => {
                     setDeletingId(tag.id)
                     setDeletingName(tag.name)

@@ -1,4 +1,4 @@
-import { useState, type DragEvent } from 'react'
+import { useRef, useState, type DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { FileSpreadsheet, Info, Lock, UploadCloud } from 'lucide-react'
@@ -20,6 +20,7 @@ export function ImportPage() {
   const { user } = useAuth()
 
   const [file, setFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [importing, setImporting] = useState(false)
   const [outcome, setOutcome] = useState<Outcome>({ kind: 'idle' })
   const [errors, setErrors] = useState<ExcelRowError[]>([])
@@ -33,7 +34,7 @@ export function ImportPage() {
           <h1 className="page-title">{t('import.title')}</h1>
           <p className="page-subtitle">{t('import.subtitle')}</p>
         </div>
-        <div className="glass flex flex-col items-center gap-3 p-10 text-center animate-fade-up">
+        <div className="glass flex flex-col items-center gap-3 p-6 text-center animate-fade-up sm:p-10">
           <Lock className="h-10 w-10 text-teal-500 dark:text-neon-teal" aria-hidden="true" />
           <p className="max-w-sm text-sm text-stone-500 dark:text-stone-400">
             {t('import.requiresLogin')}
@@ -57,6 +58,8 @@ export function ImportPage() {
     setOutcome({ kind: 'idle' })
     setErrors([])
   }
+
+  const openFilePicker = () => fileInputRef.current?.click()
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
@@ -104,7 +107,9 @@ export function ImportPage() {
       </div>
 
       <div
-        className={`glass relative flex flex-col items-center gap-3 border-2 border-dashed p-10 text-center transition-all duration-300 animate-fade-up ${
+        className={`glass relative flex flex-col items-center gap-3 border-2 border-dashed p-6 text-center transition-all duration-300 animate-fade-up sm:p-10 ${
+          file ? '' : 'cursor-pointer'
+        } ${
           dragging
             ? 'scale-[1.01] border-neon-teal bg-neon-teal/10 shadow-2xl shadow-neon-teal/20 dark:border-neon-indigo dark:bg-neon-indigo/10 dark:shadow-neon-indigo/20'
             : 'border-stone-300/80 hover:border-teal-400/60 dark:border-white/15 dark:hover:border-neon-indigo/50'
@@ -115,6 +120,7 @@ export function ImportPage() {
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
+        onClick={file ? undefined : openFilePicker}
       >
         <span className={`pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-br from-teal-500/0 via-neon-rose/0 to-neon-indigo/0 blur-2xl transition-opacity ${dragging ? 'opacity-100' : 'opacity-0'}`} />
         {file ? (
@@ -125,37 +131,54 @@ export function ImportPage() {
               {(file.size / 1024).toFixed(1)} KB
             </p>
             <div className="relative flex flex-wrap justify-center gap-2">
-              <button type="button" className="btn-primary" onClick={() => void handleImport()} disabled={importing}>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => void handleImport()}
+                disabled={importing}
+              >
                 {importing ? t('import.uploading') : t('import.upload')}
               </button>
-              <label className="btn-secondary cursor-pointer">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  openFilePicker()
+                }}
+              >
                 {t('import.replacing')}
-                <input
-                  type="file"
-                  accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  className="hidden"
-                  onChange={(event) => acceptFile(event.target.files?.[0])}
-                />
-              </label>
+              </button>
             </div>
           </>
         ) : (
           <>
-            <UploadCloud className="h-10 w-10 text-teal-500 dark:text-neon-teal animate-float" aria-hidden="true" />
+            <UploadCloud
+              className="h-10 w-10 text-teal-500 dark:text-neon-teal animate-float"
+              aria-hidden="true"
+            />
             <p className="max-w-sm text-sm text-stone-500 dark:text-stone-400">
               {t('import.drop')}
             </p>
-            <label className="btn-secondary cursor-pointer">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={(event) => {
+                event.stopPropagation()
+                openFilePicker()
+              }}
+            >
               {t('import.select')}
-              <input
-                type="file"
-                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                className="hidden"
-                onChange={(event) => acceptFile(event.target.files?.[0])}
-              />
-            </label>
+            </button>
           </>
         )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          className="hidden"
+          onChange={(event) => acceptFile(event.target.files?.[0])}
+        />
       </div>
 
       <p className="flex items-start gap-2 text-xs text-stone-500 dark:text-stone-400">
@@ -242,8 +265,8 @@ export function ImportPage() {
           <h2 className="border-b border-stone-200/80 px-4 py-3 text-sm font-semibold dark:border-white/10">
             {t('import.errorsTitle')} ({errors.length})
           </h2>
-          <div className="max-h-80 overflow-y-auto">
-            <table className="w-full text-sm">
+          <div className="max-h-80 overflow-x-auto overflow-y-auto">
+            <table className="w-full min-w-[28rem] text-sm">
               <thead className="sticky top-0 bg-stone-100/90 text-left text-xs uppercase tracking-wide text-stone-500 backdrop-blur dark:bg-ink-800/90 dark:text-stone-400">
                 <tr>
                   <th className="px-4 py-2">{t('import.row')}</th>
@@ -259,7 +282,9 @@ export function ImportPage() {
                     <td className="px-4 py-2 align-top font-mono text-xs text-stone-500 dark:text-stone-400">
                       {entry.row}
                     </td>
-                    <td className="px-4 py-2 text-stone-700 dark:text-stone-300">{entry.error}</td>
+                    <td className="max-w-xs break-words px-4 py-2 text-stone-700 dark:text-stone-300">
+                      {entry.error}
+                    </td>
                   </tr>
                 ))}
               </tbody>

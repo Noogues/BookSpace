@@ -31,16 +31,16 @@ export function Modal({ open, onClose, title, children, wide = false }: ModalPro
 
   return createPortal(
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-ink-950/50 p-4 backdrop-blur-md animate-fade-up"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-ink-950/50 p-3 backdrop-blur-md animate-fade-up sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      onMouseDown={(event) => {
+      onPointerDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
       <div
-        className={`glass-strong relative w-full ${wide ? 'max-w-2xl' : 'max-w-md'} max-h-[90vh] overflow-y-auto p-6 animate-pop`}
+        className={`glass-strong relative w-full ${wide ? 'max-w-2xl' : 'max-w-md'} max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-4 animate-pop sm:p-6`}
       >
         <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon-teal/70 to-transparent" />
         <div className="mb-4 flex items-center justify-between gap-4">
@@ -49,7 +49,7 @@ export function Modal({ open, onClose, title, children, wide = false }: ModalPro
           </h2>
           <button
             type="button"
-            className="grid h-8 w-8 place-items-center rounded-full text-stone-400 transition hover:bg-stone-900/[0.05] hover:text-stone-700 dark:hover:bg-white/[0.07] dark:hover:text-stone-200"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-stone-400 transition hover:bg-stone-900/[0.05] hover:text-stone-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 sm:h-8 sm:w-8 dark:hover:bg-white/[0.07] dark:hover:text-stone-200"
             onClick={onClose}
             aria-label={t('common.close')}
           >

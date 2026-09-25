@@ -19,19 +19,23 @@ export function TagPill({
   trailing,
   title,
 }: TagPillProps) {
-  const classes = `${active ? 'chip chip-active' : 'chip'} ${size === 'sm' ? 'chip-sm' : ''} ${className}`
+  const classes = `${active ? 'chip chip-active' : 'chip'} min-w-0 max-w-full ${size === 'sm' ? 'chip-sm' : ''} ${className}`
+  const content = (
+    <>
+      <span className="min-w-0 truncate">{name}</span>
+      {trailing ? <span className="shrink-0">{trailing}</span> : null}
+    </>
+  )
   if (onClick) {
     return (
       <button type="button" onClick={onClick} className={classes} title={title}>
-        {name}
-        {trailing}
+        {content}
       </button>
     )
   }
   return (
     <span className={classes} title={title}>
-      {name}
-      {trailing}
+      {content}
     </span>
   )
 }
