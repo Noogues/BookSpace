@@ -3,35 +3,29 @@ import { Link } from 'react-router-dom'
 import { BookOpen, Star } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Book } from '../lib/types'
-import { formatRating, resolveCoverPath } from '../lib/format'
+import { formatRating } from '../lib/format'
 import { StatusBadge } from './StatusBadge'
 import { AddChaptersMenu } from './AddChaptersMenu'
+import { CoverImage } from './CoverImage'
 import { TagPill } from './TagPill'
 
 function Cover({ coverPath, name, disableHoverScale = false }: { coverPath: string | null; name: string; disableHoverScale?: boolean }) {
   const { t } = useTranslation()
-  const [broken, setBroken] = useState(false)
-
-  if (!coverPath || broken) {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-linear-to-br from-teal-100 via-paper-100 to-stone-200 dark:from-ink-700 dark:via-ink-800 dark:to-ink-900">
-        <BookOpen className="h-8 w-8 text-teal-300 dark:text-neon-indigo/60" aria-hidden="true" />
-        <span className="px-3 text-center text-xs text-stone-400 dark:text-stone-500">
-          {t('common.none')}
-        </span>
-      </div>
-    )
-  }
 
   return (
-    <img
-      src={resolveCoverPath(coverPath)}
+    <CoverImage
+      coverPath={coverPath}
       alt={name}
-      loading="lazy"
-      referrerPolicy="no-referrer"
-      decoding="async"
+      sizes="(min-width: 1536px) 240px, (min-width: 1024px) 220px, (min-width: 768px) 25vw, 50vw"
       className={`h-full w-full object-cover ${disableHoverScale ? 'scale-100 transition-none' : 'transition-transform duration-500 group-hover:scale-110'}`}
-      onError={() => setBroken(true)}
+      fallback={
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-linear-to-br from-teal-100 via-paper-100 to-stone-200 dark:from-ink-700 dark:via-ink-800 dark:to-ink-900">
+          <BookOpen className="h-8 w-8 text-teal-300 dark:text-neon-indigo/60" aria-hidden="true" />
+          <span className="px-3 text-center text-xs text-stone-400 dark:text-stone-500">
+            {t('common.none')}
+          </span>
+        </div>
+      }
     />
   )
 }

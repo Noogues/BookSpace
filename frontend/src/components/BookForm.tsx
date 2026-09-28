@@ -6,6 +6,7 @@ import { errorStatus, listTags, uploadCover } from '../lib/api'
 import { resolveCoverPath } from '../lib/format'
 import { useToast } from './toast-context'
 import { AddChaptersMenu } from './AddChaptersMenu'
+import { CoverImage } from './CoverImage'
 import { TagPill } from './TagPill'
 
 interface BookFormProps {
@@ -26,25 +27,23 @@ function initialTags(book?: Book | null): string[] {
 }
 
 function CoverPreview({ coverPath, previewUrl, name }: { coverPath: string | null; previewUrl: string | null; name: string }) {
-  const [broken, setBroken] = useState(false)
-  const src = previewUrl ?? (coverPath ? resolveCoverPath(coverPath) : '')
-  if (!src) return null
+  const source = previewUrl ?? (coverPath ? resolveCoverPath(coverPath) : '')
+  if (!source) return null
   return (
     <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-lg border border-stone-200/70 shadow-lg dark:border-white/10">
-      {broken ? (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-teal-100 to-stone-200 text-[10px] text-stone-400 dark:from-ink-700 dark:to-ink-800 dark:text-stone-500">
-          —
-        </div>
-      ) : (
-        <img
-          src={src}
-          alt={name || 'cover'}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          className="h-full w-full object-cover"
-          onError={() => setBroken(true)}
-        />
-      )}
+      <CoverImage
+        coverPath={coverPath}
+        previewUrl={previewUrl}
+        alt={name || 'cover'}
+        loading={previewUrl ? 'eager' : 'lazy'}
+        sizes="64px"
+        className="h-full w-full object-cover"
+        fallback={
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-teal-100 to-stone-200 text-[10px] text-stone-400 dark:from-ink-700 dark:to-ink-800 dark:text-stone-500">
+            —
+          </div>
+        }
+      />
     </div>
   )
 }

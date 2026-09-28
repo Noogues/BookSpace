@@ -6,9 +6,10 @@ import i18n from '../i18n'
 import { deleteBook, getBook, updateBook } from '../lib/api'
 import type { Book, BookInput } from '../lib/types'
 import { useAuth } from '../auth/auth-context'
-import { formatDate, formatRating, resolveCoverPath } from '../lib/format'
+import { formatDate, formatRating } from '../lib/format'
 import { BookForm } from '../components/BookForm'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { CoverImage } from '../components/CoverImage'
 import { ErrorState } from '../components/ErrorState'
 import { Modal } from '../components/Modal'
 import { Spinner } from '../components/Spinner'
@@ -18,24 +19,19 @@ import { useToast } from '../components/toast-context'
 
 function Cover({ coverPath, name }: { coverPath: string | null; name: string }) {
   const { t } = useTranslation()
-  const [broken, setBroken] = useState(false)
-
-  if (!coverPath || broken) {
-    return (
-      <div className="flex aspect-[2/3] w-full items-center justify-center bg-gradient-to-br from-teal-100 via-paper-100 to-neon-indigo/15 text-sm text-stone-400 dark:from-ink-700 dark:via-ink-800 dark:to-ink-900 dark:text-stone-500">
-        {t('common.none')}
-      </div>
-    )
-  }
 
   return (
-    <img
-      src={resolveCoverPath(coverPath)}
+    <CoverImage
+      coverPath={coverPath}
       alt={name}
+      loading="eager"
+      sizes="(min-width: 640px) 220px, 192px"
       className="aspect-[2/3] w-full rounded-xl object-cover shadow-2xl shadow-stone-900/20"
-      referrerPolicy="no-referrer"
-      decoding="async"
-      onError={() => setBroken(true)}
+      fallback={
+        <div className="flex aspect-[2/3] w-full items-center justify-center bg-gradient-to-br from-teal-100 via-paper-100 to-neon-indigo/15 text-sm text-stone-400 dark:from-ink-700 dark:via-ink-800 dark:to-ink-900 dark:text-stone-500">
+          {t('common.none')}
+        </div>
+      }
     />
   )
 }
