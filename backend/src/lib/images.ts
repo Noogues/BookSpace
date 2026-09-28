@@ -18,7 +18,7 @@ export const COVER_FULL_WIDTH = 800
 
 export const COVER_VARIANTS = [
   { width: COVER_THUMB_WIDTH, quality: 70 },
-  { width: COVER_FULL_WIDTH, quality: 80 },
+  { width: COVER_FULL_WIDTH, quality: 72 },
 ] as const
 
 export const SUPPORTED_MIME_TYPES = new Set([
