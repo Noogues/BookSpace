@@ -24,6 +24,15 @@ const STATUS_OPTIONS = [
   { value: 3, icon: Ban },
 ]
 
+const FORM_FIELDS = ['name', 'url', 'lastChapter', 'rating'] as const
+
+const FORM_FIELD_INPUT_ID: Record<(typeof FORM_FIELDS)[number], string> = {
+  name: 'book-name',
+  url: 'book-url',
+  lastChapter: 'book-chapter',
+  rating: 'book-rating',
+}
+
 const COVER_ERROR_KEYS: Record<string, string> = {
   UNSUPPORTED_MIME: 'errors.invalidImage',
   INVALID_IMAGE: 'errors.invalidImage',
@@ -191,6 +200,12 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
     }
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors)
+      const firstInvalid = FORM_FIELDS.find((field) => nextErrors[field])
+      if (firstInvalid) {
+        window.requestAnimationFrame(() => {
+          document.getElementById(FORM_FIELD_INPUT_ID[firstInvalid])?.focus()
+        })
+      }
       return
     }
     setErrors({})
@@ -210,11 +225,20 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
 
   const fieldError = (field: string) =>
     errors[field] ? (
-      <p className="animate-fade-up mt-1.5 inline-flex items-center gap-1 rounded-lg bg-rose-500/10 px-2 py-1 text-xs font-medium text-rose-600 dark:text-rose-300">
+      <p
+        id={`book-${field}-error`}
+        role="alert"
+        className="animate-fade-up mt-1.5 inline-flex items-center gap-1 rounded-lg bg-rose-500/10 px-2 py-1 text-xs font-medium text-rose-600 dark:text-rose-300"
+      >
         <X className="h-3 w-3" aria-hidden="true" />
         {errors[field]}
       </p>
     ) : null
+
+  const fieldAria = (field: string) =>
+    errors[field]
+      ? { 'aria-invalid': true, 'aria-describedby': `book-${field}-error` }
+      : {}
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -233,6 +257,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
                 value={name}
                 placeholder={t('books.name')}
                 onChange={(event) => setName(event.target.value)}
+                {...fieldAria('name')}
               />
               {fieldError('name')}
             </div>
@@ -266,6 +291,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
             value={url}
             placeholder="https://…"
             onChange={(event) => setUrl(event.target.value)}
+            {...fieldAria('url')}
           />
           {fieldError('url')}
         </div>
@@ -298,6 +324,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
                   className="input min-w-0 flex-1 text-center font-semibold"
                   value={lastChapter}
                   onChange={(event) => setLastChapter(event.target.value)}
+                  {...fieldAria('lastChapter')}
                 />
                 <button
                   type="button"
@@ -385,6 +412,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
               }}
               value={rating}
               onChange={(event) => setRating(event.target.value)}
+              {...fieldAria('rating')}
             />
             {fieldError('rating')}
           </div>

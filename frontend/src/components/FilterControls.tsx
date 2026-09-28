@@ -134,7 +134,7 @@ export function FilterControls({
           onOpenChange={(value) => setOpen(value ? 'tags' : '')}
         >
           {tags.length === 0 ? (
-            <p className="px-2 py-3 text-sm text-stone-500 dark:text-stone-400">
+            <p role="none" className="px-2 py-3 text-sm text-stone-500 dark:text-stone-400">
               {t('books.filters.noTags')}
             </p>
           ) : (

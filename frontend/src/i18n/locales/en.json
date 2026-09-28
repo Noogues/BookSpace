@@ -71,6 +71,8 @@
     "coverImporting": "Saving…",
     "removeCover": "Remove cover",
     "addChapters": "Add chapters",
+    "stepUp": "Increase by 1",
+    "stepDown": "Decrease by 1",
     "chapterAmount": "Amount",
     "add": "Add",
     "completedAt": "Completion date",
@@ -106,7 +108,9 @@
       "trigger": "Search",
       "hint": "Type to search by name or secondary name.",
       "noResults": "No matches.",
-      "applyFilter": "Filter by “{{query}}”"
+      "applyFilter": "Filter by “{{query}}”",
+      "resultCount_one": "{{count}} result.",
+      "resultCount_other": "{{count}} results."
     },
     "pagination": {
       "showing": "Showing {{from}}–{{to}} of {{total}}"

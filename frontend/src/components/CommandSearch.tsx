@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Search } from 'lucide-react'
 import { listBooks } from '../lib/api'
 import type { Book } from '../lib/types'
+import { useFocusTrap } from '../hooks/useFocusTrap'
+import { useScrollLock } from '../hooks/useScrollLock'
 import { CoverImage } from './CoverImage'
 
 interface CommandSearchProps {
@@ -19,23 +21,26 @@ export function CommandSearch({ onClose, onApplyName }: CommandSearchProps) {
   const [suggestions, setSuggestions] = useState<Book[]>([])
   const [highlighted, setHighlighted] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const listboxId = useId()
   const hasQuery = query.trim().length > 0
+  const optionCount = (hasQuery ? 1 : 0) + suggestions.length
+  const activeOptionId =
+    highlighted > 0 && suggestions[highlighted - 1]
+      ? `${listboxId}-option-${suggestions[highlighted - 1].id}`
+      : hasQuery
+        ? `${listboxId}-option-filter`
+        : undefined
 
-  useEffect(() => {
-    const id = window.setTimeout(() => inputRef.current?.focus(), 0)
-    return () => window.clearTimeout(id)
-  }, [])
+  useScrollLock(true)
+  useFocusTrap(dialogRef, true)
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKeyDown)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = ''
-    }
+    return () => document.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
   useEffect(() => {
@@ -96,7 +101,9 @@ export function CommandSearch({ onClose, onApplyName }: CommandSearchProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-40 flex justify-center bg-ink-950/50 p-3 pt-[8vh] backdrop-blur-md animate-fade-up sm:p-4 sm:pt-[12vh]"
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-40 flex justify-center bg-ink-950/50 p-3 pt-[8vh] backdrop-blur-md animate-fade-up outline-none sm:p-4 sm:pt-[12vh]"
       role="dialog"
       aria-modal="true"
       aria-label={t('books.search.title')}
@@ -113,6 +120,11 @@ export function CommandSearch({ onClose, onApplyName }: CommandSearchProps) {
           <input
             ref={inputRef}
             type="text"
+            role="combobox"
+            aria-expanded={optionCount > 0}
+            aria-controls={listboxId}
+            aria-autocomplete="list"
+            aria-activedescendant={activeOptionId}
             className="w-full flex-1 bg-transparent py-4 text-base text-stone-800 outline-none placeholder-stone-400 dark:text-stone-100 dark:placeholder-stone-500"
             placeholder={t('books.search.title')}
             value={query}
@@ -125,10 +137,19 @@ export function CommandSearch({ onClose, onApplyName }: CommandSearchProps) {
           </kbd>
         </div>
 
-        <div className="max-h-[60dvh] overflow-y-auto p-2">
+        <div
+          id={listboxId}
+          role="listbox"
+          aria-label={t('books.search.title')}
+          className="max-h-[60dvh] overflow-y-auto p-2"
+        >
           {hasQuery ? (
             <button
               type="button"
+              role="option"
+              id={`${listboxId}-option-filter`}
+              aria-selected={highlighted === 0}
+              tabIndex={-1}
               className={`hud-btn mb-1 w-full justify-start px-3 py-2 text-left ${
                 highlighted === 0 ? 'hud-btn-active font-medium' : ''
               }`}
@@ -152,6 +173,10 @@ export function CommandSearch({ onClose, onApplyName }: CommandSearchProps) {
               <button
                 key={book.id}
                 type="button"
+                role="option"
+                id={`${listboxId}-option-${book.id}`}
+                aria-selected={active}
+                tabIndex={-1}
                 className={`hud-btn w-full justify-start gap-2.5 px-3 py-2 text-left ${
                   active ? 'hud-btn-active font-medium' : ''
                 }`}
@@ -183,6 +208,10 @@ export function CommandSearch({ onClose, onApplyName }: CommandSearchProps) {
             )
           })}
         </div>
+
+        <p className="sr-only" role="status">
+          {hasQuery ? t('books.search.resultCount', { count: suggestions.length }) : ''}
+        </p>
       </div>
     </div>,
     document.body,

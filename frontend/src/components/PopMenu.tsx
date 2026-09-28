@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
+import { useMenu } from '../hooks/useMenu'
 
 interface PopMenuProps {
   label: string
@@ -23,10 +24,20 @@ export function PopMenu({
   buttonClassName = '',
 }: PopMenuProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const [placement, setPlacement] = useState<{
     align: 'left' | 'right'
     side: 'top' | 'bottom'
   }>({ align: 'left', side: 'bottom' })
+
+  const { onTriggerKeyDown, onItemKeyDown } = useMenu({
+    open,
+    onOpenChange,
+    triggerRef,
+    menuRef,
+    preferCheckedItem: true,
+  })
 
   useLayoutEffect(() => {
     if (!open) return
@@ -73,16 +84,17 @@ export function PopMenu({
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [open, onOpenChange])
-
   const highlighted = open || active
 
   return (
     <div className="relative min-w-0" ref={ref}>
       <button
+        ref={triggerRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => onOpenChange(!open)}
+        onKeyDown={onTriggerKeyDown}
         className={`${highlighted ? 'hud-btn hud-btn-active' : 'hud-btn'} ${buttonClassName}`}
       >
         <span className="min-w-0 max-w-40 truncate">{label}</span>
@@ -99,7 +111,9 @@ export function PopMenu({
       </button>
       {open ? (
         <div
+          ref={menuRef}
           role="menu"
+          onKeyDown={onItemKeyDown}
           className={`glass-strong absolute z-10 max-h-[min(20rem,calc(100svh-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-auto rounded-xl p-2 animate-pop ${widthClassName} ${
             placement.align === 'right' ? 'right-0' : 'left-0'
           } ${placement.side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}`}
@@ -130,6 +144,7 @@ export function PopMenuOption({
     <button
       type="button"
       role={role}
+      tabIndex={-1}
       aria-checked={checked}
       onClick={onSelect}
       className={
