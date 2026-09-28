@@ -125,7 +125,7 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
           className="flex items-center"
           style={{
             gap: GAP,
-            transform: `translate3d(${offset ?? 0}px, 0, 0)`,
+            transform: `translate3d(${offset ?? startX}px, 0, 0)`,
             transition: rolling ? `transform ${ROLL_MS}ms ${EASE}` : 'none',
           }}
         >
