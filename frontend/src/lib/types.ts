@@ -72,9 +72,14 @@ export interface BookUpdateInput {
   lastChapter?: number
   status?: number
   rating?: number
-  coverPath?: string
+  coverPath?: string | null
   completedAt?: string
   tags?: string[]
+}
+
+export interface CoverUploadResult {
+  path: string
+  thumb: string
 }
 
 export interface ExcelRowError {

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { BookOpen, Search } from 'lucide-react'
 import { listBooks } from '../lib/api'
 import type { Book } from '../lib/types'
-import { resolveCoverPath } from '../lib/format'
+import { CoverImage } from './CoverImage'
 
 interface CommandSearchProps {
   onClose: () => void
@@ -159,16 +159,15 @@ export function CommandSearch({ onClose, onApplyName }: CommandSearchProps) {
                 onMouseEnter={() => setHighlighted(index + 1)}
               >
                 <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-md bg-stone-200 dark:bg-ink-800">
-                  {book.coverPath ? (
-                    <img
-                      src={resolveCoverPath(book.coverPath)}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <BookOpen className="h-4 w-4 text-stone-400 dark:text-stone-500" aria-hidden="true" />
-                  )}
+                  <CoverImage
+                    coverPath={book.coverPath}
+                    alt=""
+                    sizes="36px"
+                    className="h-full w-full object-cover"
+                    fallback={
+                      <BookOpen className="h-4 w-4 text-stone-400 dark:text-stone-500" aria-hidden="true" />
+                    }
+                  />
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium text-stone-800 dark:text-stone-200">

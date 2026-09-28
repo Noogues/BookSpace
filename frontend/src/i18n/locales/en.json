@@ -58,10 +58,11 @@
     "lastChapter": "Chapter",
     "rating": "Rating",
     "cover": "Cover",
-    "coverUrl": "Cover URL",
     "coverUrlHint": "/covers/… or https://…",
     "uploadCover": "Upload image",
     "coverUploading": "Uploading…",
+    "coverImport": "Save here",
+    "coverImporting": "Saving…",
     "removeCover": "Remove cover",
     "addChapters": "Add chapters",
     "chapterAmount": "Amount",
@@ -201,9 +202,10 @@
     "internal": "Internal server error.",
     "unknown": "An unexpected error occurred.",
     "invalidImage": "The file must be a valid image.",
-    "imageTooLarge": "The image exceeds the maximum allowed size (10 MB).",
+    "imageTooLarge": "The image exceeds the maximum allowed size (5 MB).",
     "imageDimensions": "The image dimensions are too large.",
     "imageSave": "The image could not be saved.",
+    "coverImport": "The cover could not be downloaded from the URL.",
     "loadBooks": "Could not load the books.",
     "loadBook": "Could not load the book.",
     "loadTags": "Could not load the tags."
@@ -215,6 +217,7 @@
     "advance": "“{{book}}” advanced a chapter.",
     "advance_other": "“{{book}}” advanced {{count}} chapters.",
     "coverUploaded": "Cover uploaded successfully.",
+    "coverImported": "Cover saved and compressed on the server.",
     "tagCreated": "Tag created.",
     "tagDeleted": "Tag deleted."
   }

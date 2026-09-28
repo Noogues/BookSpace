@@ -1,29 +1,34 @@
 import { randomUUID } from 'node:crypto'
-import { mkdir, unlink, writeFile } from 'node:fs/promises'
-import path from 'node:path'
+import { mkdir } from 'node:fs/promises'
 import type { FastifyInstance } from 'fastify'
-import sharp from 'sharp'
+import { z } from 'zod'
 import { requireAuth } from '../lib/auth.js'
+import {
+  CoverImageError,
+  assertSupportedImage,
+  assertSupportedMimeType,
+  fetchRemoteImage,
+  writeCoverVariants,
+} from '../lib/images.js'
 
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
-const MAX_WIDTH = 800
-const COVER_QUALITY = 80
-const SUPPORTED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const remoteUrlSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .max(2048)
+    .refine((value) => {
+      try {
+        const parsed = new URL(value)
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+      } catch {
+        return false
+      }
+    }),
+})
 
-export { MAX_UPLOAD_BYTES }
-
-export async function deleteCoverFile(
-  coversDir: string,
-  coverPath: string,
-): Promise<void> {
-  const filename = coverPath.replace(/^\/+/, '')
-  if (!filename) return
-  const target = path.join(coversDir, filename)
-  try {
-    await unlink(target)
-  } catch {
-    // File does not exist or cannot be deleted
-  }
+function coverErrorCode(error: unknown): string {
+  if (error instanceof CoverImageError) return error.code
+  return 'INVALID_IMAGE'
 }
 
 export async function coversRoutes(
@@ -33,52 +38,55 @@ export async function coversRoutes(
   const dir = opts.coversDir
   await mkdir(dir, { recursive: true })
 
-  async function processImage(buffer: Buffer, mimeType: string): Promise<Buffer> {
-    if (!SUPPORTED_MIME_TYPES.has(mimeType)) {
-      throw new Error('UNSUPPORTED_MIME_TYPE')
-    }
-    return sharp(buffer)
-      .resize({
-        width: MAX_WIDTH,
-        withoutEnlargement: true,
-      })
-      .webp({ quality: COVER_QUALITY })
-      .toBuffer()
-  }
-
   app.post('/covers', { preHandler: requireAuth }, async (request, reply) => {
     let file: Awaited<ReturnType<typeof request.file>> | undefined
     try {
       file = await request.file()
     } catch {
-      return reply.status(413).send({ error: 'El archivo supera el tamaño máximo permitido' })
+      return reply.status(413).send({ error: 'TOO_LARGE' })
     }
     if (!file) {
-      return reply.status(400).send({ error: 'No se recibió ningún archivo' })
+      return reply.status(400).send({ error: 'INVALID_IMAGE' })
     }
 
-    if (!SUPPORTED_MIME_TYPES.has(file.mimetype)) {
-      return reply.status(400).send({ error: 'La portada debe ser una imagen válida' })
+    try {
+      assertSupportedMimeType(file.mimetype)
+    } catch (error) {
+      return reply.status(400).send({ error: coverErrorCode(error) })
     }
 
     let buffer: Buffer
     try {
       buffer = await file.toBuffer()
     } catch {
-      return reply.status(413).send({ error: 'El archivo supera el tamaño máximo permitido' })
+      return reply.status(413).send({ error: 'TOO_LARGE' })
     }
 
-    let processed: Buffer
     try {
-      processed = await processImage(buffer, file.mimetype)
-    } catch {
-      return reply.status(400).send({ error: 'La portada debe ser una imagen válida' })
+      await assertSupportedImage(buffer)
+      const variants = await writeCoverVariants(dir, buffer, randomUUID())
+      return reply.status(201).send(variants)
+    } catch (error) {
+      return reply.status(400).send({ error: coverErrorCode(error) })
+    }
+  })
+
+  app.post('/covers/import-url', { preHandler: requireAuth }, async (request, reply) => {
+    const { url } = remoteUrlSchema.parse(request.body)
+
+    let buffer: Buffer
+    try {
+      buffer = await fetchRemoteImage(url)
+    } catch (error) {
+      return reply.status(400).send({ error: coverErrorCode(error) })
     }
 
-    const filename = `${randomUUID()}.webp`
-    const target = path.join(dir, filename)
-    await writeFile(target, processed, { flag: 'wx' })
-
-    return reply.status(201).send({ path: filename })
+    try {
+      await assertSupportedImage(buffer)
+      const variants = await writeCoverVariants(dir, buffer, randomUUID())
+      return reply.status(201).send(variants)
+    } catch (error) {
+      return reply.status(400).send({ error: coverErrorCode(error) })
+    }
   })
 }

@@ -58,10 +58,11 @@
     "lastChapter": "Capítulo",
     "rating": "Valoración",
     "cover": "Portada",
-    "coverUrl": "URL de la portada",
     "coverUrlHint": "/covers/… o https://…",
     "uploadCover": "Subir imagen",
     "coverUploading": "Subiendo…",
+    "coverImport": "Guardar aquí",
+    "coverImporting": "Guardando…",
     "removeCover": "Quitar portada",
     "addChapters": "Añadir capítulos",
     "chapterAmount": "Cantidad",
@@ -201,9 +202,10 @@
     "internal": "Error interno del servidor.",
     "unknown": "Ha ocurrido un error inesperado.",
     "invalidImage": "El archivo debe ser una imagen válida.",
-    "imageTooLarge": "La imagen supera el tamaño máximo permitido (10 MB).",
+    "imageTooLarge": "La imagen supera el tamaño máximo permitido (5 MB).",
     "imageDimensions": "Las dimensiones de la imagen son demasiado grandes.",
     "imageSave": "No se pudo guardar la imagen.",
+    "coverImport": "No se pudo descargar la portada desde la URL.",
     "loadBooks": "No se pudieron cargar los libros.",
     "loadBook": "No se pudo cargar el libro.",
     "loadTags": "No se pudieron cargar las etiquetas."
@@ -215,6 +217,7 @@
     "advance": "«{{book}}» avanzó un capítulo.",
     "advance_other": "«{{book}}» avanzó {{count}} capítulos.",
     "coverUploaded": "Portada subida correctamente.",
+    "coverImported": "Portada guardada y comprimida en el servidor.",
     "tagCreated": "Etiqueta creada.",
     "tagDeleted": "Etiqueta eliminada."
   }

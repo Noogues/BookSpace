@@ -9,7 +9,7 @@ Reading tracker for books and web novels. Manage your library with chapters, rat
 - **Library**: create, edit and organize books with name, alternative name, link, current chapter, status and rating.
 - **Chapters**: add chapters in bulk and advance a book's progress.
 - **Tags**: organize books by tags and filter the library.
-- **Covers**: upload cover images or use a URL.
+- **Covers**: upload cover images or use a URL. They are cropped to 2:3, stored as WebP in two sizes (200 px and 800 px), and every view downloads only the one it needs.
 - **Excel import**: add many books at once from a `.xlsx` file.
 - **Dark mode**: light/dark theme following system preference.
 - **Internationalization**: interface in Spanish and English.
@@ -125,7 +125,8 @@ POST   /api/books/import    Import books from Excel (multipart)
 GET    /api/tags            List tags with book counts
 POST   /api/tags            Create/upsert tag
 DELETE /api/tags/:id        Delete tag
-POST   /api/covers          Upload cover (multipart)
+POST   /api/covers          Upload cover (multipart) → { path, thumb }
+POST   /api/covers/import-url   Download cover from a URL → { path, thumb }
 GET    /covers/*            Static cover files
 ```
 

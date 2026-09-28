@@ -4,6 +4,7 @@ import type {
   BookFilters,
   BookInput,
   BookUpdateInput,
+  CoverUploadResult,
   ExcelRowError,
   ImportResult,
   PaginatedBooks,
@@ -88,10 +89,15 @@ export async function importExcel(file: File): Promise<ImportResult> {
   return data
 }
 
-export async function uploadCover(file: File): Promise<{ path: string }> {
+export async function uploadCover(file: File): Promise<CoverUploadResult> {
   const form = new FormData()
   form.append('file', file)
-  const { data } = await api.post<{ path: string }>('/covers', form)
+  const { data } = await api.post<CoverUploadResult>('/covers', form)
+  return data
+}
+
+export async function importCoverUrl(url: string): Promise<CoverUploadResult> {
+  const { data } = await api.post<CoverUploadResult>('/covers/import-url', { url })
   return data
 }
 
