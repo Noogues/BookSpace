@@ -82,7 +82,7 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
     )
   }, [order, viewportWidth])
 
-  const startX = viewportWidth
+  const startX = 0
   const endX = viewportWidth / 2 - LEAD_COUNT * PITCH - ITEM_WIDTH / 2
 
   useEffect(() => {
