@@ -47,12 +47,10 @@ function Tile({ book, alt }: { book: Book; alt: string }) {
 export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelProps) {
   const { t } = useTranslation()
   const viewportRef = useRef<HTMLDivElement>(null)
-  const timerRef = useRef<number | null>(null)
+  const stripRef = useRef<HTMLDivElement>(null)
   const landedRef = useRef(onLanded)
   const [viewportWidth, setViewportWidth] = useState(0)
   const [coverReady, setCoverReady] = useState(false)
-  const [rolling, setRolling] = useState(false)
-  const [offset, setOffset] = useState<number | null>(null)
   const [order] = useState(() => shuffle(candidates))
 
   useEffect(() => {
@@ -91,22 +89,21 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
   }, [coverReady])
 
   useEffect(() => {
-    if (!coverReady || viewportWidth <= 0 || order.length === 0) return
-    let glide = 0
-    const place = requestAnimationFrame(() => {
-      glide = requestAnimationFrame(() => {
-        setRolling(true)
-        setOffset(endX)
-        timerRef.current = window.setTimeout(() => {
-          setRolling(false)
-          landedRef.current()
-        }, ROLL_MS)
+    const strip = stripRef.current
+    if (!strip || !coverReady || viewportWidth <= 0 || order.length === 0) return
+
+    const animation = strip.animate(
+      [{ transform: 'translate3d(0px, 0, 0)' }, { transform: `translate3d(${endX}px, 0, 0)` }],
+      { duration: ROLL_MS, easing: EASE, fill: 'forwards' },
+    )
+    animation.finished
+      .then(() => {
+        landedRef.current()
       })
-    })
+      .catch(() => undefined)
+
     return () => {
-      cancelAnimationFrame(place)
-      cancelAnimationFrame(glide)
-      if (timerRef.current !== null) window.clearTimeout(timerRef.current)
+      animation.cancel()
     }
   }, [coverReady, viewportWidth, endX, order.length])
 
@@ -120,12 +117,9 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
         aria-label={t('books.randomRolling')}
       >
         <div
+          ref={stripRef}
           className="flex items-center"
-          style={{
-            gap: GAP,
-            transform: `translate3d(${offset ?? 0}px, 0, 0)`,
-            transition: rolling ? `transform ${ROLL_MS}ms ${EASE}` : 'none',
-          }}
+          style={{ gap: GAP }}
         >
           {lead.map((book, index) => (
             <div
