@@ -171,7 +171,12 @@
     "booksCount_one": "{{count}} book",
     "booksCount_other": "{{count}} books",
     "deleteTitle": "Delete tag",
-    "deleteMessage": "Delete the tag “{{name}}”? It will be removed from all its books."
+    "deleteMessage": "Delete the tag “{{name}}”? It will be removed from all its books.",
+    "renameTitle": "Rename “{{name}}”",
+    "renameExists": "A tag with that name already exists.",
+    "mergeTitle": "Merge “{{name}}”",
+    "mergeMessage": "Every book on this tag will move to the one you pick, and the source tag will be deleted.",
+    "mergeNoTargets": "There are no other tags to merge into."
   },
   "dashboard": {
     "library": "My Shelf",
@@ -250,6 +255,8 @@
     "coverUploaded": "Cover uploaded successfully.",
     "coverImported": "Cover saved and compressed on the server.",
     "tagCreated": "Tag created.",
-    "tagDeleted": "Tag deleted."
+    "tagDeleted": "Tag deleted.",
+    "tagRenamed": "Tag renamed.",
+    "tagsMerged": "Tags merged."
   }
 }

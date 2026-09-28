@@ -171,7 +171,12 @@
     "booksCount_one": "{{count}} libro",
     "booksCount_other": "{{count}} libros",
     "deleteTitle": "Eliminar etiqueta",
-    "deleteMessage": "¿Eliminar la etiqueta «{{name}}»? Se desvinculará de todos sus libros."
+    "deleteMessage": "¿Eliminar la etiqueta «{{name}}»? Se desvinculará de todos sus libros.",
+    "renameTitle": "Renombrar «{{name}}»",
+    "renameExists": "Ya existe una etiqueta con ese nombre.",
+    "mergeTitle": "Fusionar «{{name}}»",
+    "mergeMessage": "Todos los libros de esta etiqueta pasarán a la que elijas, y la de origen se eliminará.",
+    "mergeNoTargets": "No hay otras etiquetas con las que fusionarse."
   },
   "dashboard": {
     "library": "Mi estantería",
@@ -250,6 +255,8 @@
     "coverUploaded": "Portada subida correctamente.",
     "coverImported": "Portada guardada y comprimida en el servidor.",
     "tagCreated": "Etiqueta creada.",
-    "tagDeleted": "Etiqueta eliminada."
+    "tagDeleted": "Etiqueta eliminada.",
+    "tagRenamed": "Etiqueta renombrada.",
+    "tagsMerged": "Etiquetas fusionadas."
   }
 }
