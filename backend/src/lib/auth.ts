@@ -6,12 +6,17 @@ const MAX_AGE_SECONDS = 60 * 60 * 24 * 30
 const isProduction = (process.env.NODE_ENV ?? 'development') === 'production'
 const ephemeralSecret = randomBytes(32).toString('hex')
 
-function secret(): string {
+function configuredSecret(): string | null {
   const value = process.env.AUTH_SECRET
-  if (isProduction && (!value || value.length < 16)) {
+  return value && value.length >= 16 ? value : null
+}
+
+function secret(): string {
+  const value = configuredSecret()
+  if (isProduction && !value) {
     throw new Error('AUTH_SECRET debe definirse con al menos 16 caracteres en producción')
   }
-  return value && value.length >= 16 ? value : ephemeralSecret
+  return value ?? ephemeralSecret
 }
 
 function signToken(payload: string): string {
@@ -77,16 +82,17 @@ export async function requireAuth(request: FastifyRequest, reply: FastifyReply):
   }
 }
 
+function credentialDigest(value: string): Buffer {
+  return createHmac('sha256', secret()).update(value, 'utf8').digest()
+}
+
 export function passwordMatches(input: string): boolean {
-  const expected = process.env.ADMIN_PASSWORD ?? ''
-  const inputBuffer = Buffer.from(input)
-  const expectedBuffer = Buffer.from(expected)
-  if (inputBuffer.length !== expectedBuffer.length) return false
-  return timingSafeEqual(inputBuffer, expectedBuffer)
+  return timingSafeEqual(credentialDigest(input), credentialDigest(process.env.ADMIN_PASSWORD ?? ''))
 }
 
 export function validateCredentials(username: string, password: string): boolean {
   const expectedUsername = process.env.ADMIN_USER ?? ''
   if (!expectedUsername || !process.env.ADMIN_PASSWORD) return false
-  return timingSafeEqual(Buffer.from(username), Buffer.from(expectedUsername)) && passwordMatches(password)
+  const usernameMatches = timingSafeEqual(credentialDigest(username), credentialDigest(expectedUsername))
+  return usernameMatches && passwordMatches(password)
 }
