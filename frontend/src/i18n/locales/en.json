@@ -51,6 +51,7 @@
     "title": "Library",
     "shelfSubtitle": "Edit, filter and organize all your books",
     "new": "New book",
+    "read": "Read",
     "empty": "There are no books matching the filters.",
     "name": "Name",
     "secundaryName": "Alternative name",

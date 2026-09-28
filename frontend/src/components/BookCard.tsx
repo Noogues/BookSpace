@@ -7,6 +7,7 @@ import { formatRating } from '../lib/format'
 import { StatusBadge } from './StatusBadge'
 import { AddChaptersMenu } from './AddChaptersMenu'
 import { CoverImage } from './CoverImage'
+import { ReadButton } from './ReadButton'
 import { TagPill } from './TagPill'
 
 function Cover({ coverPath, name, disableHoverScale = false }: { coverPath: string | null; name: string; disableHoverScale?: boolean }) {
@@ -133,14 +134,17 @@ export function BookCard({ book, onAdvance, disableHoverEffects = false, onChapt
         </div>
       ) : null}
 
-      {onAdvance ? (
-        <div className="absolute right-2 top-2 z-10">
-          <AddChaptersMenu
-            iconOnly
-            align="right"
-            onOpenChange={handleChaptersMenuOpenChange}
-            onAdd={(amount) => onAdvance(book, amount)}
-          />
+      {onAdvance || book.url ? (
+        <div className="absolute right-2 top-2 z-10 flex items-center gap-1">
+          {book.url ? <ReadButton url={book.url} iconOnly /> : null}
+          {onAdvance ? (
+            <AddChaptersMenu
+              iconOnly
+              align="right"
+              onOpenChange={handleChaptersMenuOpenChange}
+              onAdd={(amount) => onAdvance(book, amount)}
+            />
+          ) : null}
         </div>
       ) : null}
     </div>
