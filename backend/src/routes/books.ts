@@ -10,13 +10,13 @@ const bookInclude = { tags: { include: { tag: true } } } as const
 
 const baseBookSchema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
-  secundaryName: z.string().trim().min(1).optional(),
+  secundaryName: z.string().trim().min(1).nullable().optional(),
   url: z.string().trim().min(1, 'La url es obligatoria'),
   lastChapter: z.number().int().min(0).default(0),
   status: z.number().int().min(0).max(3).default(0),
   rating: z.number().min(0).max(10).default(0),
   coverPath: z.string().trim().nullable().default(null),
-  completedAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().nullable().optional(),
   tags: z.array(z.string().trim().min(1)).default([]),
 })
 
@@ -24,13 +24,13 @@ const createBookSchema = baseBookSchema
 
 const updateBookSchema = z.object({
   name: z.string().trim().min(1).optional(),
-  secundaryName: z.string().trim().min(1).optional(),
+  secundaryName: z.string().trim().min(1).nullable().optional(),
   url: z.string().trim().min(1).optional(),
   lastChapter: z.number().int().min(0).optional(),
   status: z.number().int().min(0).max(3).optional(),
   rating: z.number().min(0).max(10).optional(),
   coverPath: z.string().trim().nullable().optional(),
-  completedAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().nullable().optional(),
   tags: z.array(z.string().trim().min(1)).optional(),
 })
 
