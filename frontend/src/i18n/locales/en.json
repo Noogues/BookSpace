@@ -60,6 +60,8 @@
     "empty": "There are no books matching the filters.",
     "name": "Name",
     "secundaryName": "Alternative name",
+    "number_one": "{{count}} book",
+    "number_other": "{{count}} books",
     "url": "Link",
     "lastChapter": "Chapter",
     "rating": "Rating",
@@ -195,7 +197,19 @@
     "rated": "rated",
     "byStatus": "Status distribution",
     "topTags": "Top tags",
-    "noBooks": "Add some books to see your stats."
+    "noBooks": "Add some books to see your stats.",
+    "chapters_one": "{{count}} chapter",
+    "chapters_other": "{{count}} chapters",
+    "ratedBooks_one": "{{count}} rated",
+    "ratedBooks_other": "{{count}} rated",
+    "noRatings": "Not rated yet",
+    "completedThisYear_one": "{{count}} finished this year",
+    "completedThisYear_other": "{{count}} finished this year",
+    "addedThisYear_one": "{{count}} added",
+    "addedThisYear_other": "{{count}} added",
+    "percent": "{{count}}%",
+    "noTags": "No books have tags yet.",
+    "tagHint": "Tag your books to see which ones come up most."
   },
   "settings": {
     "title": "Settings",
@@ -224,7 +238,8 @@
     "coverImport": "The cover could not be downloaded from the URL.",
     "loadBooks": "Could not load the books.",
     "loadBook": "Could not load the book.",
-    "loadTags": "Could not load the tags."
+    "loadTags": "Could not load the tags.",
+    "loadStats": "Could not load the statistics."
   },
   "toast": {
     "saved": "Saved successfully.",

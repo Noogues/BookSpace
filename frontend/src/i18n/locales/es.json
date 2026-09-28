@@ -60,6 +60,8 @@
     "empty": "No hay libros que coincidan con los filtros.",
     "name": "Nombre",
     "secundaryName": "Nombre alternativo",
+    "number_one": "{{count}} libro",
+    "number_other": "{{count}} libros",
     "url": "Enlace",
     "lastChapter": "Capítulo",
     "rating": "Valoración",
@@ -195,7 +197,19 @@
     "rated": "valorados",
     "byStatus": "Distribución por estado",
     "topTags": "Etiquetas principales",
-    "noBooks": "Añade algunos libros para ver tus estadísticas."
+    "noBooks": "Añade algunos libros para ver tus estadísticas.",
+    "chapters_one": "{{count}} capítulo",
+    "chapters_other": "{{count}} capítulos",
+    "ratedBooks_one": "{{count}} valorado",
+    "ratedBooks_other": "{{count}} valorados",
+    "noRatings": "Todavía sin valoraciones",
+    "completedThisYear_one": "{{count}} terminado este año",
+    "completedThisYear_other": "{{count}} terminados este año",
+    "addedThisYear_one": "{{count}} añadido",
+    "addedThisYear_other": "{{count}} añadidos",
+    "percent": "{{count}}%",
+    "noTags": "Ningún libro tiene etiquetas todavía.",
+    "tagHint": "Asigna etiquetas a tus libros para ver cuáles se repiten."
   },
   "settings": {
     "title": "Ajustes",
@@ -224,7 +238,8 @@
     "coverImport": "No se pudo descargar la portada desde la URL.",
     "loadBooks": "No se pudieron cargar los libros.",
     "loadBook": "No se pudo cargar el libro.",
-    "loadTags": "No se pudieron cargar las etiquetas."
+    "loadTags": "No se pudieron cargar las etiquetas.",
+    "loadStats": "No se pudieron cargar las estadísticas."
   },
   "toast": {
     "saved": "Guardado correctamente.",

@@ -7,6 +7,7 @@ import type {
   CoverUploadResult,
   ExcelRowError,
   ImportResult,
+  LibraryStats,
   PaginatedBooks,
   Tag,
   TagWithCount,
@@ -108,6 +109,11 @@ export async function importCoverUrl(url: string): Promise<CoverUploadResult> {
 
 export async function listTags(): Promise<TagWithCount[]> {
   const { data } = await api.get<TagWithCount[]>('/tags')
+  return data
+}
+
+export async function getStats(): Promise<LibraryStats> {
+  const { data } = await api.get<LibraryStats>('/stats')
   return data
 }
 

@@ -76,6 +76,27 @@ export interface CoverUploadResult {
   thumb: string
 }
 
+export interface StatusCount {
+  status: number
+  count: number
+}
+
+export interface TagCount {
+  name: string
+  count: number
+}
+
+export interface LibraryStats {
+  totalBooks: number
+  totalChapters: number
+  averageRating: number
+  ratedBooks: number
+  completedThisYear: number
+  addedThisYear: number
+  byStatus: StatusCount[]
+  topTags: TagCount[]
+}
+
 export interface ExcelRowError {
   row: number
   error: string
