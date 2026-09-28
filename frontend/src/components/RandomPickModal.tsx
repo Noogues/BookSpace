@@ -44,9 +44,9 @@ export function RandomPickModal({ book, candidates, rollId, onClose, onPickAgain
     <Modal open={open} onClose={onClose} title={t('books.randomTitle')}>
       {book === null ? (
         <div className="flex flex-col items-center gap-4">
-          <div className="flex w-full justify-center gap-3 overflow-hidden" aria-hidden="true">
-            {[0, 1, 2, 3, 4].map((index) => (
-              <div key={index} className="w-[104px] shrink-0 animate-pulse" style={{ animationDelay: `${index * 90}ms` }}>
+          <div className="flex w-full justify-center gap-4 overflow-hidden" aria-hidden="true">
+            {[0, 1, 2, 3].map((index) => (
+              <div key={index} className="w-[148px] shrink-0 animate-pulse" style={{ animationDelay: `${index * 90}ms` }}>
                 <Placeholder />
               </div>
             ))}
@@ -70,8 +70,8 @@ export function RandomPickModal({ book, candidates, rollId, onClose, onPickAgain
               sizes="160px"
               className="aspect-[2/3] w-full rounded-xl object-cover shadow-2xl shadow-stone-900/20"
               fallback={
-                <div className="flex aspect-[2/3] w-full items-center justify-center rounded-xl bg-gradient-to-br from-teal-100 via-paper-100 to-neon-indigo/15 text-sm text-stone-400 dark:from-ink-700 dark:via-ink-800 dark:to-ink-900 dark:text-stone-500">
-                  {t('common.none')}
+                <div className="flex aspect-[2/3] w-full items-center justify-center rounded-xl bg-linear-to-br from-teal-100 via-paper-100 to-neon-indigo/15 p-3 text-center text-sm font-semibold leading-snug text-stone-500 dark:from-ink-700 dark:via-ink-800 dark:to-ink-900 dark:text-stone-400">
+                  <span className="line-clamp-4">{book.name}</span>
                 </div>
               }
             />
@@ -97,7 +97,7 @@ export function RandomPickModal({ book, candidates, rollId, onClose, onPickAgain
           </div>
 
           <div className="flex w-full flex-wrap gap-2">
-            {book.url ? <ReadButton url={book.url} className="btn-secondary flex-1 justify-center" /> : null}
+            {book.url ? <ReadButton url={book.url} className="btn-link flex-1 justify-center" /> : null}
             <button
               type="button"
               className="btn-secondary flex-1 justify-center"

@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next'
 import type { Book } from '../lib/types'
 import { CoverImage } from './CoverImage'
 
-const ITEM_WIDTH = 104
-const GAP = 12
+const ITEM_WIDTH = 148
+const GAP = 16
 const PITCH = ITEM_WIDTH + GAP
-const DUMMY_COUNT = 14
+const LEAD_COUNT = 12
 const ROLL_MS = 1650
 const COVER_WAIT_MS = 600
 const EASE = 'cubic-bezier(0.1, 0.72, 0.15, 1)'
@@ -17,8 +17,31 @@ interface RandomBookReelProps {
   onLanded: () => void
 }
 
-function Placeholder() {
-  return <div className="aspect-[2/3] w-full rounded-xl bg-linear-to-br from-stone-200 to-stone-300 dark:from-ink-700 dark:to-ink-800" />
+function shuffle<T>(items: T[]): T[] {
+  const copy = [...items]
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(Math.random() * (index + 1))
+    const held = copy[index]
+    copy[index] = copy[swap]
+    copy[swap] = held
+  }
+  return copy
+}
+
+function Tile({ book, alt }: { book: Book; alt: string }) {
+  return (
+    <CoverImage
+      coverPath={book.coverPath}
+      alt={alt}
+      sizes={`${ITEM_WIDTH}px`}
+      className="aspect-[2/3] w-full rounded-xl object-cover"
+      fallback={
+        <div className="flex aspect-[2/3] w-full items-center justify-center rounded-xl bg-linear-to-br from-stone-200 to-stone-300 p-3 text-center text-sm font-semibold leading-snug text-stone-600 dark:from-ink-700 dark:to-ink-800 dark:text-stone-300">
+          <span className="line-clamp-4">{book.name}</span>
+        </div>
+      }
+    />
+  )
 }
 
 export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelProps) {
@@ -30,17 +53,15 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
   const [coverReady, setCoverReady] = useState(false)
   const [rolling, setRolling] = useState(false)
   const [offset, setOffset] = useState<number | null>(null)
+  const [order] = useState(() => shuffle(candidates))
 
   useEffect(() => {
     landedRef.current = onLanded
   }, [onLanded])
 
-  const dummies = useMemo(
-    () =>
-      candidates.length === 0
-        ? []
-        : Array.from({ length: DUMMY_COUNT }, (_, index) => candidates[index % candidates.length]),
-    [candidates],
+  const lead = useMemo(
+    () => Array.from({ length: LEAD_COUNT }, (_, index) => order[index % order.length]),
+    [order],
   )
 
   useLayoutEffect(() => {
@@ -53,8 +74,16 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
     return () => observer.disconnect()
   }, [])
 
+  const trailing = useMemo(() => {
+    const needed = Math.ceil((viewportWidth / 2 + GAP) / PITCH) + 1
+    return Array.from(
+      { length: needed },
+      (_, index) => order[(LEAD_COUNT + index) % order.length],
+    )
+  }, [order, viewportWidth])
+
   const startX = viewportWidth
-  const endX = -(dummies.length * PITCH + ITEM_WIDTH / 2 - viewportWidth / 2)
+  const endX = viewportWidth / 2 - LEAD_COUNT * PITCH - ITEM_WIDTH / 2
 
   useEffect(() => {
     if (coverReady) return
@@ -63,7 +92,7 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
   }, [coverReady])
 
   useEffect(() => {
-    if (!coverReady || startX <= 0 || dummies.length === 0) return
+    if (!coverReady || startX <= 0 || order.length === 0) return
     let glide = 0
     const place = requestAnimationFrame(() => {
       setOffset(startX)
@@ -81,7 +110,7 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
       cancelAnimationFrame(glide)
       if (timerRef.current !== null) window.clearTimeout(timerRef.current)
     }
-  }, [coverReady, startX, endX, dummies.length])
+  }, [coverReady, startX, endX, order.length])
 
   return (
     <div className="relative">
@@ -100,17 +129,16 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
             transition: rolling ? `transform ${ROLL_MS}ms ${EASE}` : 'none',
           }}
         >
-          {dummies.map((book, index) => (
-            <div key={`dummy-${index}`} className="shrink-0 opacity-70" style={{ width: ITEM_WIDTH }}>
-              <CoverImage
-                coverPath={book.coverPath}
-                alt=""
-                sizes={`${ITEM_WIDTH}px`}
-                className="aspect-[2/3] w-full rounded-xl object-cover"
-                fallback={<Placeholder />}
-              />
+          {lead.map((book, index) => (
+            <div
+              key={`lead-${book.id}-${index}`}
+              className="shrink-0 opacity-70"
+              style={{ width: ITEM_WIDTH }}
+            >
+              <Tile book={book} alt="" />
             </div>
           ))}
+
           <div
             className="shrink-0 ring-2 ring-teal-400 ring-offset-2 ring-offset-paper-50 dark:ring-neon-teal dark:ring-offset-ink-950"
             style={{ width: ITEM_WIDTH }}
@@ -122,9 +150,23 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
               loading="eager"
               onLoad={() => setCoverReady(true)}
               className="aspect-[2/3] w-full rounded-xl object-cover shadow-xl"
-              fallback={<Placeholder />}
+              fallback={
+                <div className="flex aspect-[2/3] w-full items-center justify-center rounded-xl bg-linear-to-br from-stone-200 to-stone-300 p-3 text-center text-sm font-semibold leading-snug text-stone-600 dark:from-ink-700 dark:to-ink-800 dark:text-stone-300">
+                  <span className="line-clamp-4">{target.name}</span>
+                </div>
+              }
             />
           </div>
+
+          {trailing.map((book, index) => (
+            <div
+              key={`trail-${book.id}-${index}`}
+              className="shrink-0 opacity-70"
+              style={{ width: ITEM_WIDTH }}
+            >
+              <Tile book={book} alt="" />
+            </div>
+          ))}
         </div>
       </div>
 
