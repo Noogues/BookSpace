@@ -8,6 +8,7 @@ import path from 'node:path'
 import { ZodError } from 'zod'
 import { booksRoutes } from './routes/books.js'
 import { coversRoutes } from './routes/covers.js'
+import { statsRoutes } from './routes/stats.js'
 import { tagsRoutes } from './routes/tags.js'
 import { authRoutes } from './routes/auth.js'
 import { MAX_UPLOAD_BYTES } from './lib/images.js'
@@ -55,6 +56,7 @@ await app.register(fastifyStatic, {
 
 await app.register(booksRoutes, { prefix: '/api', coversDir })
 await app.register(coversRoutes, { prefix: '/api', coversDir })
+await app.register(statsRoutes, { prefix: '/api' })
 await app.register(tagsRoutes, { prefix: '/api' })
 await app.register(authRoutes, { prefix: '/api' })
 
