@@ -60,7 +60,7 @@ export function FilterControls({
     filters.status !== '' || filters.tags.length > 0 || filters.sort !== 'updated' || filters.order !== 'desc'
 
   return (
-    <div className="glass relative z-20 flex min-w-0 max-w-full flex-col gap-2 px-3 py-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1 sm:gap-y-2 animate-fade-up">
+    <div className="glass relative z-30 flex min-w-0 max-w-full flex-col gap-2 px-3 py-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1 sm:gap-y-2 animate-fade-up">
       <div className="grid w-full grid-cols-3 gap-1 sm:contents">
         <PopMenu
           buttonClassName="w-full justify-center sm:w-auto sm:justify-start"
