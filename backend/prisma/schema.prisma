@@ -4,12 +4,14 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
+  extensions = [pg_trgm]
 }
 
 model Book {
@@ -28,6 +30,9 @@ model Book {
   tags BookTag[]
 
   @@index([status])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "Book_name_trgm_idx")
+  @@index([secundaryName(ops: raw("gin_trgm_ops"))], type: Gin, map: "Book_secundaryName_trgm_idx")
+  @@index([url(ops: raw("gin_trgm_ops"))], type: Gin, map: "Book_url_trgm_idx")
 }
 
 model Tag {
@@ -35,6 +40,8 @@ model Tag {
   name String @unique
 
   books BookTag[]
+
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "Tag_name_trgm_idx")
 }
 
 model BookTag {
