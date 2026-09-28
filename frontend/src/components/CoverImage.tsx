@@ -9,6 +9,7 @@ interface CoverImageProps {
   loading?: 'lazy' | 'eager'
   previewUrl?: string | null
   fallback?: ReactNode
+  onLoad?: () => void
 }
 
 export function CoverImage({
@@ -19,12 +20,13 @@ export function CoverImage({
   loading = 'lazy',
   previewUrl = null,
   fallback = null,
+  onLoad,
 }: CoverImageProps) {
   const [broken, setBroken] = useState(false)
 
   if (previewUrl) {
     return (
-      <img src={previewUrl} alt={alt} className={className} referrerPolicy="no-referrer" />
+      <img src={previewUrl} alt={alt} className={className} referrerPolicy="no-referrer" onLoad={onLoad} />
     )
   }
 
@@ -42,6 +44,7 @@ export function CoverImage({
       decoding="async"
       referrerPolicy="no-referrer"
       className={className}
+      onLoad={onLoad}
       onError={() => setBroken(true)}
     />
   )

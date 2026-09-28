@@ -34,10 +34,13 @@ const updateBookSchema = z.object({
   tags: z.array(z.string().trim().min(1)).optional(),
 })
 
-const listQuerySchema = z.object({
+const filterQuerySchema = z.object({
   name: z.string().trim().min(1).optional(),
   status: z.coerce.number().int().min(0).max(3).optional(),
   tag: z.union([z.string(), z.array(z.string())]).optional(),
+})
+
+const listQuerySchema = filterQuerySchema.extend({
   sort: z.enum(['updated', 'added', 'name']).default('updated'),
   order: z.enum(['asc', 'desc']).default('desc'),
   page: z.coerce.number().int().min(1).default(1),
@@ -61,6 +64,20 @@ async function resolveTags(names: string[]): Promise<number[]> {
   return [...tagIds]
 }
 
+function buildWhere({ name, status, tag }: z.infer<typeof filterQuerySchema>): Prisma.BookWhereInput {
+  const tagList = (Array.isArray(tag) ? tag : tag ? [tag] : [])
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0)
+
+  return {
+    ...(name ? { name: { contains: name, mode: 'insensitive' as const } } : {}),
+    ...(status !== undefined ? { status } : {}),
+    ...(tagList.length > 0
+      ? { AND: tagList.map((tagName) => ({ tags: { some: { tag: { name: tagName } } } })) }
+      : {}),
+  }
+}
+
 export async function booksRoutes(
   app: FastifyInstance,
   opts: { coversDir: string },
@@ -68,19 +85,8 @@ export async function booksRoutes(
   const dir = opts.coversDir
 
   app.get('/books', async (request) => {
-    const { name, status, tag, sort, order, page, pageSize } = listQuerySchema.parse(request.query)
-
-    const tagList = (Array.isArray(tag) ? tag : tag ? [tag] : [])
-      .map((value) => value.trim())
-      .filter((value) => value.length > 0)
-
-    const where: Prisma.BookWhereInput = {
-      ...(name ? { name: { contains: name, mode: 'insensitive' as const } } : {}),
-      ...(status !== undefined ? { status } : {}),
-      ...(tagList.length > 0
-        ? { AND: tagList.map((name) => ({ tags: { some: { tag: { name } } } })) }
-        : {}),
-    }
+    const { sort, order, page, pageSize, ...filters } = listQuerySchema.parse(request.query)
+    const where = buildWhere(filters)
 
     const orderBy: Prisma.BookOrderByWithRelationInput =
       sort === 'name'
@@ -101,6 +107,21 @@ export async function booksRoutes(
     ])
 
     return { total, page, pageSize, items }
+  })
+
+  app.get('/books/random', async (request, reply) => {
+    const where = buildWhere(filterQuerySchema.parse(request.query))
+
+    const total = await prisma.book.count({ where })
+    if (total === 0) return reply.status(404).send({ error: 'NO_BOOKS_TO_PICK' })
+
+    const book = await prisma.book.findFirst({
+      where,
+      skip: Math.floor(Math.random() * total),
+      include: bookInclude,
+    })
+    if (!book) return reply.status(404).send({ error: 'NO_BOOKS_TO_PICK' })
+    return book
   })
 
   app.get('/books/:id', async (request, reply) => {

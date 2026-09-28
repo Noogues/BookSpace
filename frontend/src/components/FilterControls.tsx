@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, RotateCcw, X } from 'lucide-react'
+import { Dices, Plus, RotateCcw, X } from 'lucide-react'
 import type { FilterValues, TagWithCount } from '../lib/types'
 import { PopMenu, PopMenuOption } from './PopMenu'
 
@@ -8,6 +8,8 @@ interface FilterControlsProps {
   filters: FilterValues
   tags: TagWithCount[]
   onCreate?: () => void
+  onPickRandom?: () => void
+  pickingRandom?: boolean
   onStatusChange: (status: string) => void
   onTagChange: (tags: string[]) => void
   onSortChange: (sort: string) => void
@@ -27,6 +29,8 @@ export function FilterControls({
   filters,
   tags,
   onCreate,
+  onPickRandom,
+  pickingRandom = false,
   onStatusChange,
   onTagChange,
   onSortChange,
@@ -56,7 +60,7 @@ export function FilterControls({
     filters.status !== '' || filters.tags.length > 0 || filters.sort !== 'updated' || filters.order !== 'desc'
 
   return (
-    <div className="glass relative z-20 flex min-w-0 max-w-full flex-col gap-2 px-3 py-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1 sm:gap-y-2 animate-fade-up">
+    <div className="glass relative z-30 flex min-w-0 max-w-full flex-col gap-2 px-3 py-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1 sm:gap-y-2 animate-fade-up">
       <div className="grid w-full grid-cols-3 gap-1 sm:contents">
         <PopMenu
           buttonClassName="w-full justify-center sm:w-auto sm:justify-start"
@@ -169,7 +173,7 @@ export function FilterControls({
         </>
       ) : null}
 
-      {hasActiveFilters || onCreate ? (
+      {hasActiveFilters || onCreate || onPickRandom ? (
         <div className="flex w-full items-center gap-1 sm:ml-auto sm:w-auto">
           {hasActiveFilters ? (
             <button
@@ -179,6 +183,24 @@ export function FilterControls({
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
               {t('books.filters.reset')}
+            </button>
+          ) : null}
+          {onPickRandom ? (
+            <button
+              type="button"
+              className="hud-btn flex-1 justify-center sm:flex-none"
+              onClick={onPickRandom}
+              disabled={pickingRandom}
+            >
+              {pickingRandom ? (
+                <span
+                  className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-stone-400 border-t-teal-500 dark:border-stone-500 dark:border-t-neon-teal"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Dices className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              {t('books.pickRandom')}
             </button>
           ) : null}
           {onCreate ? (

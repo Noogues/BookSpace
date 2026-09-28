@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
-import { createBook, listBooks, listTags, updateBook } from '../lib/api'
+import { createBook, listBooks, listTags, pickRandomBook, updateBook } from '../lib/api'
 import type { Book, BookFilters, BookInput, FilterValues, PaginatedBooks, TagWithCount } from '../lib/types'
 import { useAuth } from '../auth/auth-context'
 import { BookCard } from '../components/BookCard'
@@ -11,6 +11,7 @@ import { ErrorState } from '../components/ErrorState'
 import { FilterControls } from '../components/FilterControls'
 import { Modal } from '../components/Modal'
 import { Pagination } from '../components/Pagination'
+import { RandomPickModal } from '../components/RandomPickModal'
 import { Spinner } from '../components/Spinner'
 import { useToast } from '../components/toast-context'
 
@@ -29,6 +30,9 @@ export function ShelfPage() {
   const [loadError, setLoadError] = useState(false)
   const [tags, setTags] = useState<TagWithCount[]>([])
   const [createOpen, setCreateOpen] = useState(false)
+  const [pickingRandom, setPickingRandom] = useState(false)
+  const [randomPick, setRandomPick] = useState<Book | null>(null)
+  const [randomRoll, setRandomRoll] = useState(0)
   const [chaptersMenuOpen, setChaptersMenuOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
@@ -143,6 +147,23 @@ export function ShelfPage() {
       .finally(() => setLoading(false))
   }, [loadBooks])
 
+  const handlePickRandom = useCallback(async () => {
+    setPickingRandom(true)
+    setRandomPick(null)
+    setRandomRoll((current) => current + 1)
+    try {
+      const params: BookFilters = {}
+      if (filters.name) params.name = filters.name
+      if (filters.status) params.status = Number(filters.status)
+      if (filters.tags.length > 0) params.tag = filters.tags
+      setRandomPick(await pickRandomBook(params))
+    } catch {
+      push('error', t('errors.unknown'))
+    } finally {
+      setPickingRandom(false)
+    }
+  }, [filters, push, t])
+
   const handleAdvance = async (book: Book, amount = 1) => {
     try {
       await updateBook(book.id, { lastChapter: book.lastChapter + amount })
@@ -166,6 +187,8 @@ export function ShelfPage() {
         filters={filters}
         tags={tags}
         onCreate={user ? () => setCreateOpen(true) : undefined}
+        onPickRandom={() => void handlePickRandom()}
+        pickingRandom={pickingRandom}
         onStatusChange={handleStatusChange}
         onTagChange={handleTagChange}
         onSortChange={handleSortChange}
@@ -218,6 +241,15 @@ export function ShelfPage() {
       >
         <BookForm submitting={creating} onSubmit={(input) => void handleCreate(input)} />
       </Modal>
+
+      <RandomPickModal
+        book={randomPick}
+        candidates={data?.items ?? []}
+        rollId={randomRoll}
+        picking={pickingRandom}
+        onPickAgain={() => void handlePickRandom()}
+        onClose={() => setRandomPick(null)}
+      />
     </div>
   )
 }

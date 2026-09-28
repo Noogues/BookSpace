@@ -12,6 +12,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog'
 import { CoverImage } from '../components/CoverImage'
 import { ErrorState } from '../components/ErrorState'
 import { Modal } from '../components/Modal'
+import { ReadButton } from '../components/ReadButton'
 import { Spinner } from '../components/Spinner'
 import { StatusBadge } from '../components/StatusBadge'
 import { TagPill } from '../components/TagPill'
@@ -215,6 +216,7 @@ export function BookDetailPage() {
             ) : null}
 
             <div className="flex flex-wrap gap-2 pt-2">
+              {book.url ? <ReadButton url={book.url} /> : null}
               {user ? (
                 <>
                   <button type="button" className="btn-secondary" onClick={() => setEditOpen(true)}>

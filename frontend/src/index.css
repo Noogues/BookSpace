@@ -144,7 +144,11 @@
   }
 
   .btn-danger {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-linear-to-r from-rose-600 to-neon-rose px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-rose-500/35 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:from-rose-500 dark:to-neon-rose;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-linear-to-r from-rose-600 to-neon-rose px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-rose-500/35 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:from-rose-500 dark:to-neon-rose;
+  }
+
+  .btn-link {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-teal-500/40 bg-teal-500/10 px-5 py-2.5 text-sm font-semibold text-teal-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-500/70 hover:bg-teal-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 dark:border-neon-teal/35 dark:bg-neon-teal/12 dark:text-neon-teal dark:hover:border-neon-teal/60 dark:hover:bg-neon-teal/20;
   }
 
   .btn-ghost {

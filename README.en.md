@@ -117,6 +117,7 @@ npm run dev            # http://localhost:5173
 ```
 GET    /api/health          Health check
 GET    /api/books           List/pagination/filters (name, status, tag, page, pageSize)
+GET    /api/books/random    Random book honouring the filters
 GET    /api/books/:id       Book by id
 POST   /api/books           Create book
 PATCH  /api/books/:id       Update book
