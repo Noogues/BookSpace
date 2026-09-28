@@ -82,7 +82,6 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
     )
   }, [order, viewportWidth])
 
-  const startX = 0
   const endX = viewportWidth / 2 - LEAD_COUNT * PITCH - ITEM_WIDTH / 2
 
   useEffect(() => {
@@ -92,10 +91,9 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
   }, [coverReady])
 
   useEffect(() => {
-    if (!coverReady || startX <= 0 || order.length === 0) return
+    if (!coverReady || viewportWidth <= 0 || order.length === 0) return
     let glide = 0
     const place = requestAnimationFrame(() => {
-      setOffset(startX)
       glide = requestAnimationFrame(() => {
         setRolling(true)
         setOffset(endX)
@@ -110,7 +108,7 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
       cancelAnimationFrame(glide)
       if (timerRef.current !== null) window.clearTimeout(timerRef.current)
     }
-  }, [coverReady, startX, endX, order.length])
+  }, [coverReady, viewportWidth, endX, order.length])
 
   return (
     <div className="relative">
@@ -125,7 +123,7 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
           className="flex items-center"
           style={{
             gap: GAP,
-            transform: `translate3d(${offset ?? startX}px, 0, 0)`,
+            transform: `translate3d(${offset ?? 0}px, 0, 0)`,
             transition: rolling ? `transform ${ROLL_MS}ms ${EASE}` : 'none',
           }}
         >
