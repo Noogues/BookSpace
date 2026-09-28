@@ -53,6 +53,7 @@ export function BookCard({ book, onAdvance, disableHoverEffects = false, onChapt
 
   const handleMove = (event: PointerEvent<HTMLDivElement>) => {
     if (disableHoverEffects || event.pointerType !== 'mouse') return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const el = event.currentTarget
     const rect = el.getBoundingClientRect()
     const px = (event.clientX - rect.left) / rect.width - 0.5

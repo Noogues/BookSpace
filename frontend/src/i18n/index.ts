@@ -21,9 +21,12 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 })
 
-i18n.on('languageChanged', (lng) => {
+function syncLanguage(lng: string): void {
   localStorage.setItem(STORAGE_KEY, lng)
   document.documentElement.lang = lng
-})
+}
+
+i18n.on('languageChanged', syncLanguage)
+syncLanguage(i18n.resolvedLanguage ?? getInitialLanguage())
 
 export default i18n

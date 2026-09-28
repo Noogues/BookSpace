@@ -1,7 +1,9 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useFocusTrap } from '../hooks/useFocusTrap'
+import { useScrollLock } from '../hooks/useScrollLock'
 
 interface ModalProps {
   open: boolean
@@ -13,6 +15,11 @@ interface ModalProps {
 
 export function Modal({ open, onClose, title, children, wide = false }: ModalProps) {
   const { t } = useTranslation()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const titleId = useId()
+
+  useScrollLock(open)
+  useFocusTrap(dialogRef, open)
 
   useEffect(() => {
     if (!open) return
@@ -20,21 +27,19 @@ export function Modal({ open, onClose, title, children, wide = false }: ModalPro
       if (event.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKeyDown)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = ''
-    }
+    return () => document.removeEventListener('keydown', onKeyDown)
   }, [open, onClose])
 
   if (!open) return null
 
   return createPortal(
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-ink-950/50 p-3 backdrop-blur-md animate-fade-up sm:p-4"
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-40 flex items-center justify-center bg-ink-950/50 p-3 backdrop-blur-md animate-fade-up outline-none sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-labelledby={titleId}
       onPointerDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -44,7 +49,10 @@ export function Modal({ open, onClose, title, children, wide = false }: ModalPro
       >
         <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon-teal/70 to-transparent" />
         <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="font-display text-xl font-semibold tracking-tight text-stone-900 dark:text-white">
+          <h2
+            id={titleId}
+            className="font-display text-xl font-semibold tracking-tight text-stone-900 dark:text-white"
+          >
             {title}
           </h2>
           <button

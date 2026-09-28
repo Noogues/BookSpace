@@ -1,7 +1,8 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Minus, Plus } from 'lucide-react'
+import { useMenu } from '../hooks/useMenu'
 
 const QUICK_AMOUNTS = [1, 3, 5, 10]
 
@@ -26,6 +27,18 @@ export function AddChaptersMenu({ onAdd, iconOnly = false, align = 'right', disa
   const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const quickRowRef = useRef<HTMLDivElement>(null)
+
+  const { onTriggerKeyDown, onItemKeyDown } = useMenu({
+    open,
+    onOpenChange: (value) => {
+      setOpen(value)
+      if (!value) setMenuPosition(null)
+    },
+    triggerRef,
+    menuRef: quickRowRef,
+  })
 
   useLayoutEffect(() => {
     onOpenChange?.(open)
@@ -128,6 +141,7 @@ export function AddChaptersMenu({ onAdd, iconOnly = false, align = 'right', disa
   return (
     <div className="relative" ref={containerRef}>
       <button
+        ref={triggerRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -138,6 +152,7 @@ export function AddChaptersMenu({ onAdd, iconOnly = false, align = 'right', disa
           setMenuPosition(null)
           setOpen((current) => !current)
         }}
+        onKeyDown={onTriggerKeyDown}
         className={
           iconOnly
             ? 'inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-stone-950/45 text-white shadow-lg backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-linear-to-r hover:from-teal-500 hover:to-neon-sky hover:shadow-teal-500/40 disabled:cursor-not-allowed disabled:opacity-60 sm:h-8 sm:w-8 dark:border-white/20 dark:bg-white/10 dark:hover:from-neon-teal dark:hover:to-neon-indigo dark:hover:text-ink-950'
@@ -151,7 +166,15 @@ export function AddChaptersMenu({ onAdd, iconOnly = false, align = 'right', disa
         ? createPortal(
             <div
               ref={menuRef}
-              role="menu"
+              role="group"
+              aria-label={t('books.addChapters')}
+              onKeyDown={(event: ReactKeyboardEvent) => {
+                if (event.key === 'Escape') {
+                  event.stopPropagation()
+                  setOpen(false)
+                  setMenuPosition(null)
+                }
+              }}
               style={{
                 top: menuPosition?.top ?? -10000,
                 left: menuPosition?.left ?? -10000,
@@ -160,15 +183,21 @@ export function AddChaptersMenu({ onAdd, iconOnly = false, align = 'right', disa
               }}
               className="glass-strong fixed z-[100] w-64 max-h-[min(28rem,calc(100svh-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-y-auto p-3 animate-pop sm:w-72"
             >
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400">
+          <p role="none" className="mb-2 text-[11px] font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400">
             {t('books.addChapters')}
           </p>
-          <div className="flex flex-wrap gap-1.5">
+          <div
+            ref={quickRowRef}
+            role="menu"
+            onKeyDown={onItemKeyDown}
+            className="flex flex-wrap gap-1.5"
+          >
             {QUICK_AMOUNTS.map((amount) => (
               <button
                 key={amount}
                 type="button"
                 role="menuitem"
+                tabIndex={-1}
                 className="chip h-11 min-w-11 justify-center px-2.5 sm:h-8"
                 onClick={() => commit(amount)}
               >
@@ -187,7 +216,7 @@ export function AddChaptersMenu({ onAdd, iconOnly = false, align = 'right', disa
                   type="button"
                   className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-stone-200/80 text-stone-500 transition hover:border-teal-400 hover:text-teal-600 sm:h-8 sm:w-8 dark:border-white/10 dark:text-stone-400 dark:hover:border-neon-indigo/60 dark:hover:text-neon-indigo"
                   onClick={() => bumpCustom(-1)}
-                  aria-label="−1"
+                  aria-label={t('books.stepDown')}
                 >
                   <Minus className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
@@ -207,7 +236,7 @@ export function AddChaptersMenu({ onAdd, iconOnly = false, align = 'right', disa
                   type="button"
                   className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-linear-to-br from-teal-500 to-neon-sky text-white shadow-md shadow-teal-500/30 transition hover:scale-105 sm:h-8 sm:w-8 dark:from-neon-indigo dark:to-neon-sky dark:text-ink-950"
                   onClick={() => bumpCustom(1)}
-                  aria-label="+1"
+                  aria-label={t('books.stepUp')}
                 >
                   <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
