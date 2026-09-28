@@ -9,10 +9,22 @@ const FOCUSABLE = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',')
 
+const FORM_FIELD = 'input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled])'
+
+function isVisible(element: HTMLElement): boolean {
+  return element.offsetParent !== null || element.getClientRects().length > 0
+}
+
 function focusableWithin(container: HTMLElement): HTMLElement[] {
-  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-    (element) => element.offsetParent !== null || element.getClientRects().length > 0,
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(isVisible)
+}
+
+function initialTargetWithin(container: HTMLElement): HTMLElement {
+  const focusable = focusableWithin(container)
+  const formField = focusable.find(
+    (element) => element.matches(FORM_FIELD) && !element.closest('[role="menu"]'),
   )
+  return formField ?? focusable[0] ?? container
 }
 
 export function useFocusTrap(containerRef: RefObject<HTMLElement | null>, active: boolean): void {
@@ -22,12 +34,7 @@ export function useFocusTrap(containerRef: RefObject<HTMLElement | null>, active
 
     const previouslyFocused = document.activeElement as HTMLElement | null
 
-    const focusFirst = () => {
-      const [first] = focusableWithin(container)
-      ;(first ?? container).focus()
-    }
-
-    const id = window.requestAnimationFrame(focusFirst)
+    const id = window.requestAnimationFrame(() => initialTargetWithin(container).focus())
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Tab') return
