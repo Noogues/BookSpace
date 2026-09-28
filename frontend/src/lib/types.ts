@@ -35,10 +35,13 @@ export interface PaginatedBooks {
   items: Book[]
 }
 
+export type TagMatchMode = 'all' | 'any'
+
 export interface FilterValues {
   name: string
   status: string
   tags: string[]
+  tagMode: TagMatchMode
   sort: string
   order: string
 }
@@ -47,7 +50,8 @@ export interface BookFilters {
   name?: string
   status?: number
   tag?: string[]
-  sort?: 'updated' | 'added' | 'name'
+  tagMode?: TagMatchMode
+  sort?: 'updated' | 'added' | 'name' | 'rating'
   order?: 'asc' | 'desc'
   page?: number
   pageSize?: number

@@ -85,13 +85,14 @@
     "editTitle": "Editar libro",
     "createTitle": "Nuevo libro",
     "filters": {
-      "namePlaceholder": "Buscar por nombre…",
+      "namePlaceholder": "Busca por nombre, etiqueta o enlace…",
       "status": "Estado",
       "tag": "Etiqueta",
       "sort": "Orden",
       "recentlyUpdated": "Recientemente actualizado",
       "dateAdded": "Fecha de entrada",
       "name": "Nombre",
+      "rating": "Valoración",
       "asc": "Ascendente",
       "desc": "Descendente",
       "recent": "Recientes",
@@ -101,12 +102,17 @@
       "direction": "Dirección",
       "noTags": "No hay etiquetas todavía.",
       "removeFilter": "Quitar filtro",
+      "tagMatch": "Combinar etiquetas",
+      "tagMode": {
+        "all": "Con todas",
+        "any": "Con alguna"
+      },
       "reset": "Limpiar filtros"
     },
     "search": {
       "title": "Buscar libros",
       "trigger": "Buscar",
-      "hint": "Escribe para buscar por nombre o nombre alternativo.",
+      "hint": "Escribe para buscar por nombre, nombre alternativo, etiqueta o enlace.",
       "noResults": "Sin coincidencias.",
       "applyFilter": "Filtrar por «{{query}}»",
       "resultCount_one": "{{count}} resultado.",
