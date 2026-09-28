@@ -504,7 +504,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
                 }
               />
             ))}
-            <div className="relative min-w-0 flex-1 basis-44 sm:w-44 sm:flex-none">
+            <div className="relative w-full basis-full">
               <input
                 className="input h-11 w-full pr-11 text-base sm:h-9 sm:text-sm"
                 placeholder={t('books.addTag')}
