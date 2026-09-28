@@ -9,7 +9,7 @@ Seguimiento de lecturas para libros y novelas web. Gestiona tu biblioteca con ca
 - **Biblioteca**: crea, edita y organiza libros con nombre, nombre alternativo, enlace, capítulo actual, estado y valoración.
 - **Capítulos**: añade capítulos de golpe y avanza el progreso del libro.
 - **Etiquetas**: organiza los libros por etiquetas y filtra la biblioteca.
-- **Portadas**: sube imágenes de portada o usa una URL.
+- **Portadas**: sube imágenes de portada o usa una URL. Se recortan a 2:3, se guardan en WebP con dos tamaños (200 px y 800 px) y cada vista descarga solo el que necesita.
 - **Importación Excel**: añade varios libros a la vez desde un archivo `.xlsx`.
 - **Modo oscuro**: tema claro/oscuro con preferencia del sistema.
 - **Internacionalización**: interfaz en español e inglés.
@@ -125,7 +125,8 @@ POST   /api/books/import    Importar libros desde Excel (multipart)
 GET    /api/tags            Lista etiquetas con conteo de libros
 POST   /api/tags            Crear/upsert etiqueta
 DELETE /api/tags/:id        Borrar etiqueta
-POST   /api/covers          Subir portada (multipart)
+POST   /api/covers          Subir portada (multipart) → { path, thumb }
+POST   /api/covers/import-url   Descargar portada desde una URL → { path, thumb }
 GET    /covers/*            Archivos estáticos de portadas
 ```
 

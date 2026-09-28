@@ -43,9 +43,11 @@ Después de cualquier cambio, ejecutar `lint` y `typecheck` en la parte afectada
 
 ### Backend (`backend/`)
 
-- **Entrada**: `src/server.ts` — instancia de Fastify, CORS abierto, multipart, estáticos en `/covers`, manejo global de errores (Zod → 400, error con `statusCode` → pase directo, resto → 500).
+- **Entrada**: `src/server.ts` — instancia de Fastify, CORS abierto, multipart, estáticos en `/covers`, manejo global de errores (Zod → 400, error con `statusCode` → pase directo, resto → 500). El `setErrorHandler` debe registrarse **antes** de los plugins: si no, Fastify usa su manejador por defecto y todo error de validación responde 500.
 - **Rutas**: registradas como plugins de Fastify bajo `/api`.
 - **Prisma v7 con driver adapter**: conexión vía `@prisma/adapter-pg` (`src/lib/prisma.ts`), cliente generado en `generated/prisma/` (no en `node_modules`). La config del CLI está en `prisma7.config.ts`.
+- **Pipeline de portadas**: `src/lib/images.ts` (sharp) recorta a 2:3, respeta la orientación EXIF y escribe dos variantes WebP: `<uuid>_200.webp` (q70) y `<uuid>_800.webp` (q80), sin ampliar nunca la imagen. `src/lib/cover-migration.ts` convierte las portadas antiguas y se ejecuta tras el `listen` (no bloquea). El campo `coverPath` guarda siempre la variante `_800`; la `_200` se deriva por nombre en el frontend.
+- **Migración de portadas**: marker en `data/covers/.covers-migration.json` (24 h de gracia, firmado con la versión del pipeline). Es idempotente y descarta huérfanos, pero se ejecuta contra el directorio real: en dev el backend corre con `tsx watch`, así que editarlo dispara la migración de inmediato.
 - **Validación**: Zod inline en cada handler (no esquemas de Fastify).
 - **ESM en todo el backend**: `"type": "module"`; los imports usan extensiones `.js` explícitas aunque el código fuente sea `.ts`.
 
@@ -55,6 +57,7 @@ Después de cualquier cambio, ejecutar `lint` y `typecheck` en la parte afectada
 - **Rutas**: `/` (ShelfPage), `/books/:id` (BookDetailPage), `/import` (ImportPage), `/tags` (TagsPage), catch-all redirige a `/`.
 - **Estado**: React local (`useState`) + dos contextos: `theme/theme-context.ts` y `components/toast-context.ts`. Sin librerías de estado ni fetching externas (React Query/SWR no se usan).
 - **Comunicación**: `src/lib/api.ts` (Axios, baseURL `/api`). En dev, Vite hace proxy de `/api` y `/covers` a `http://backend:3000`.
+- **Portadas en el cliente**: `src/lib/image.ts` recodifica a WebP con el canvas antes de subir (máx. 1600 px, q85, solo si ahorra peso). `src/components/CoverImage.tsx` es el único sitio que renderiza `<img>` de portada: deriva el `srcSet` de las dos variantes con `coverSrcSet` (`src/lib/format.ts`) y `sizes` según el contexto.
 - **Estilos**: Tailwind v4 con tokens custom en `src/index.css` (`@theme` + clases de componente `glass`, `btn-*`, `chip`, etc.). Dark mode por clase `.dark` en `<html>`.
 - **i18n**: i18next + react-i18next, español (por defecto) e inglés; `src/i18n/locales/{es,en}.json`. Las claves deben añadirse en ambos archivos.
 
@@ -81,7 +84,7 @@ POST   /api/books/import    - Importar libros desde Excel (multipart)
 GET    /api/tags            - Lista etiquetas con conteo de libros
 POST   /api/tags            - Crear/upsert etiqueta
 DELETE /api/tags/:id        - Borrar etiqueta
-GET    /covers/*            - Archivos estáticos de portadas
+GET    /covers/*            - Archivos estáticos de portadas (con `Cache-Control: immutable` de 1 año)
 ```
 
 `POST /api/books/import` devuelve 201 (todo ok), 207 (importación parcial) o 400 (sin libros válidos).
@@ -94,7 +97,10 @@ backend/
     server.ts          # Entrada Fastify
     lib/prisma.ts      # Singleton de Prisma
     lib/excel.ts       # Parser de Excel (ExcelJS)
+    lib/images.ts      # sharp: validación, recorte 2:3, variantes, fetch remoto
+    lib/cover-migration.ts # Migración de portadas legacy al formato por variantes
     routes/books.ts    # CRUD + import de libros
+    routes/covers.ts   # Subida de portada e importación por URL
     routes/tags.ts     # CRUD de etiquetas
   prisma/schema.prisma # Modelos
   generated/prisma/    # Cliente Prisma generado (no editar)
@@ -106,8 +112,8 @@ frontend/
     main.tsx           # Entrada React
     index.css          # Tailwind v4 + clases custom
     pages/             # Shelf, BookDetail, Import, Tags
-    components/        # UI compartida
-    lib/               # api.ts, types.ts, format.ts
+    components/        # UI compartida (CoverImage.tsx renderiza todas las portadas)
+    lib/               # api.ts, types.ts, format.ts, image.ts (compresión en cliente)
     i18n/              # init y locales es/en
     theme/             # ThemeProvider + context
 data/covers/           # Portadas servidas en /covers
@@ -133,6 +139,7 @@ docker-compose.override.yml  # Dev: puertos expuestos + live reload
 - **Idioma**: las claves de i18n y los cambios visuales se hacen en español e inglés simultáneamente.
 - **Imports**: en el backend usar extensiones `.js` en imports locales (patrón ESM de Node, aunque sea TS).
 - **No comentarios**: no añadir comentarios al código salvo que se pidan explícitamente.
+- **Portadas**: toda subida o importación pasa por `writeCoverVariants`. No escribir ficheros en `data/covers` a mano ni guardar rutas fuera del patrón `<uuid>_<ancho>.webp`.
 - **Estados de libro**: no introducir un nuevo status sin actualizar `BOOK_STATUS` del frontend y la validación Zod/Prisma del backend.
 - **CAMEL_CASE vs snake_case**: respetar nombres existentes aunque contengan typos (`secundaryName`, `updateAt`).
 - **Generado**: no editar `backend/generated/`.
