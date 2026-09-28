@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dices, Plus, RotateCcw, X } from 'lucide-react'
-import type { FilterValues, TagWithCount } from '../lib/types'
+import type { FilterValues, TagMatchMode, TagWithCount } from '../lib/types'
 import { PopMenu, PopMenuOption } from './PopMenu'
 
 interface FilterControlsProps {
@@ -12,6 +12,7 @@ interface FilterControlsProps {
   pickingRandom?: boolean
   onStatusChange: (status: string) => void
   onTagChange: (tags: string[]) => void
+  onTagModeChange: (tagMode: TagMatchMode) => void
   onSortChange: (sort: string) => void
   onOrderChange: (order: string) => void
   onReset: () => void
@@ -21,6 +22,7 @@ const SORT_OPTIONS: { value: string; labelKey: string }[] = [
   { value: 'updated', labelKey: 'books.filters.recent' },
   { value: 'added', labelKey: 'books.filters.added' },
   { value: 'name', labelKey: 'books.filters.name' },
+  { value: 'rating', labelKey: 'books.filters.rating' },
 ]
 
 const STATUS_VALUES = ['', '0', '1', '2', '3']
@@ -33,6 +35,7 @@ export function FilterControls({
   pickingRandom = false,
   onStatusChange,
   onTagChange,
+  onTagModeChange,
   onSortChange,
   onOrderChange,
   onReset,
@@ -169,6 +172,27 @@ export function FilterControls({
                 </button>
               </span>
             ))}
+            {filters.tags.length > 1 ? (
+              <div
+                className="segmented"
+                role="group"
+                aria-label={t('books.filters.tagMatch')}
+              >
+                {(['all', 'any'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    aria-pressed={filters.tagMode === mode}
+                    className={`segmented-option focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 dark:focus-visible:ring-neon-teal ${
+                      filters.tagMode === mode ? 'segmented-option-active' : ''
+                    }`}
+                    onClick={() => onTagModeChange(mode)}
+                  >
+                    {t(`books.filters.tagMode.${mode}`)}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         </>
       ) : null}
