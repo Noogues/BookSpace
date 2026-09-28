@@ -237,8 +237,8 @@ function isBlockedAddress(address: string, family: number): boolean {
 
 async function assertPublicHost(url: URL): Promise<void> {
   if (url.hostname === 'localhost') throw new CoverImageError('BLOCKED_HOST')
-  const addresses = await lookup(url.hostname, { all: true }).catch(() => [])
-  if (addresses.length === 0) throw new CoverImageError('BLOCKED_HOST')
+  const addresses = await lookup(url.hostname, { all: true }).catch(() => null)
+  if (!addresses || addresses.length === 0) throw new CoverImageError('INVALID_REMOTE')
   for (const { address, family } of addresses) {
     if (isBlockedAddress(address, family)) throw new CoverImageError('BLOCKED_HOST')
   }
