@@ -2,7 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { createBook, listBooks, listTags, pickRandomBook, updateBook } from '../lib/api'
-import type { Book, BookFilters, BookInput, FilterValues, PaginatedBooks, TagWithCount } from '../lib/types'
+import type {
+  Book,
+  BookFilters,
+  BookInput,
+  FilterValues,
+  PaginatedBooks,
+  TagMatchMode,
+  TagWithCount,
+} from '../lib/types'
 import { useAuth } from '../auth/auth-context'
 import { BookCard } from '../components/BookCard'
 import { BookForm } from '../components/BookForm'
@@ -16,7 +24,14 @@ import { Spinner } from '../components/Spinner'
 import { useToast } from '../components/toast-context'
 
 const PAGE_SIZE = 18
-const EMPTY_FILTERS: FilterValues = { name: '', status: '', tags: [], sort: 'updated', order: 'desc' }
+const EMPTY_FILTERS: FilterValues = {
+  name: '',
+  status: '',
+  tags: [],
+  tagMode: 'all',
+  sort: 'updated',
+  order: 'desc',
+}
 
 export function ShelfPage() {
   const { t } = useTranslation()
@@ -54,15 +69,23 @@ export function ShelfPage() {
     }
   }, [])
 
-  const loadBooks = useCallback(async () => {
-    const params: BookFilters = { page, pageSize: PAGE_SIZE }
+  const buildFilterParams = useCallback((): BookFilters => {
+    const params: BookFilters = {}
     if (filters.name) params.name = filters.name
     if (filters.status) params.status = Number(filters.status)
-    if (filters.tags.length > 0) params.tag = filters.tags
+    if (filters.tags.length > 0) {
+      params.tag = filters.tags
+      params.tagMode = filters.tagMode
+    }
+    return params
+  }, [filters])
+
+  const loadBooks = useCallback(async () => {
+    const params: BookFilters = { ...buildFilterParams(), page, pageSize: PAGE_SIZE }
     params.sort = filters.sort as BookFilters['sort']
     params.order = filters.order as BookFilters['order']
     return listBooks(params)
-  }, [filters, page])
+  }, [buildFilterParams, filters.sort, filters.order, page])
 
   useEffect(() => {
     let active = true
@@ -114,6 +137,13 @@ export function ShelfPage() {
     setBaseFilters((current) => ({ ...current, tags }))
     setPage(1)
   }, [])
+  const handleTagModeChange = useCallback((tagMode: TagMatchMode) => {
+    setLoading(true)
+    setData(null)
+    setLoadError(false)
+    setBaseFilters((current) => ({ ...current, tagMode }))
+    setPage(1)
+  }, [])
   const handleSortChange = useCallback((sort: string) => {
     setLoading(true)
     setData(null)
@@ -152,17 +182,13 @@ export function ShelfPage() {
     setRandomPick(null)
     setRandomRoll((current) => current + 1)
     try {
-      const params: BookFilters = {}
-      if (filters.name) params.name = filters.name
-      if (filters.status) params.status = Number(filters.status)
-      if (filters.tags.length > 0) params.tag = filters.tags
-      setRandomPick(await pickRandomBook(params))
+      setRandomPick(await pickRandomBook(buildFilterParams()))
     } catch {
       push('error', t('errors.unknown'))
     } finally {
       setPickingRandom(false)
     }
-  }, [filters, push, t])
+  }, [buildFilterParams, push, t])
 
   const handleAdvance = async (book: Book, amount = 1) => {
     try {
@@ -191,6 +217,7 @@ export function ShelfPage() {
         pickingRandom={pickingRandom}
         onStatusChange={handleStatusChange}
         onTagChange={handleTagChange}
+        onTagModeChange={handleTagModeChange}
         onSortChange={handleSortChange}
         onOrderChange={handleOrderChange}
         onReset={handleReset}

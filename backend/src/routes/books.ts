@@ -38,10 +38,11 @@ const filterQuerySchema = z.object({
   name: z.string().trim().min(1).optional(),
   status: z.coerce.number().int().min(0).max(3).optional(),
   tag: z.union([z.string(), z.array(z.string())]).optional(),
+  tagMode: z.enum(['all', 'any']).default('all'),
 })
 
 const listQuerySchema = filterQuerySchema.extend({
-  sort: z.enum(['updated', 'added', 'name']).default('updated'),
+  sort: z.enum(['updated', 'added', 'name', 'rating']).default('updated'),
   order: z.enum(['asc', 'desc']).default('desc'),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
@@ -64,17 +65,38 @@ async function resolveTags(names: string[]): Promise<number[]> {
   return [...tagIds]
 }
 
-function buildWhere({ name, status, tag }: z.infer<typeof filterQuerySchema>): Prisma.BookWhereInput {
+function buildWhere({
+  name,
+  status,
+  tag,
+  tagMode,
+}: z.infer<typeof filterQuerySchema>): Prisma.BookWhereInput {
   const tagList = (Array.isArray(tag) ? tag : tag ? [tag] : [])
     .map((value) => value.trim())
     .filter((value) => value.length > 0)
 
+  const tagFilter: Prisma.BookWhereInput =
+    tagList.length === 0
+      ? {}
+      : tagMode === 'any'
+        ? { tags: { some: { tag: { name: { in: tagList } } } } }
+        : { AND: tagList.map((tagName) => ({ tags: { some: { tag: { name: tagName } } } })) }
+
+  const textFilter: Prisma.BookWhereInput = name
+    ? {
+        OR: [
+          { name: { contains: name, mode: 'insensitive' as const } },
+          { secundaryName: { contains: name, mode: 'insensitive' as const } },
+          { url: { contains: name, mode: 'insensitive' as const } },
+          { tags: { some: { tag: { name: { contains: name, mode: 'insensitive' as const } } } } },
+        ],
+      }
+    : {}
+
   return {
-    ...(name ? { name: { contains: name, mode: 'insensitive' as const } } : {}),
     ...(status !== undefined ? { status } : {}),
-    ...(tagList.length > 0
-      ? { AND: tagList.map((tagName) => ({ tags: { some: { tag: { name: tagName } } } })) }
-      : {}),
+    ...textFilter,
+    ...tagFilter,
   }
 }
 
@@ -93,7 +115,9 @@ export async function booksRoutes(
         ? { name: order }
         : sort === 'added'
           ? { createdAt: order }
-          : { updateAt: order }
+          : sort === 'rating'
+            ? { rating: order }
+            : { updateAt: order }
 
     const [total, items] = await Promise.all([
       prisma.book.count({ where }),
