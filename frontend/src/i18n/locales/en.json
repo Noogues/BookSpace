@@ -55,6 +55,8 @@
     "pickRandom": "Random",
     "randomTitle": "Your next read",
     "randomAgain": "Another",
+    "randomSearching": "Looking for something to read…",
+    "randomRolling": "Spinning the shelf",
     "empty": "There are no books matching the filters.",
     "name": "Name",
     "secundaryName": "Alternative name",

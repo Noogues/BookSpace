@@ -32,6 +32,7 @@ export function ShelfPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [pickingRandom, setPickingRandom] = useState(false)
   const [randomPick, setRandomPick] = useState<Book | null>(null)
+  const [randomRoll, setRandomRoll] = useState(0)
   const [chaptersMenuOpen, setChaptersMenuOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
@@ -148,6 +149,8 @@ export function ShelfPage() {
 
   const handlePickRandom = useCallback(async () => {
     setPickingRandom(true)
+    setRandomPick(null)
+    setRandomRoll((current) => current + 1)
     try {
       const params: BookFilters = {}
       if (filters.name) params.name = filters.name
@@ -241,6 +244,8 @@ export function ShelfPage() {
 
       <RandomPickModal
         book={randomPick}
+        candidates={data?.items ?? []}
+        rollId={randomRoll}
         picking={pickingRandom}
         onPickAgain={() => void handlePickRandom()}
         onClose={() => setRandomPick(null)}
