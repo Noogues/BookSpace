@@ -76,6 +76,7 @@ Nota: `BOOK_STATUS` (esquema de estados) está duplicado: en el backend como Zod
 ```
 GET    /api/health          - Health check
 GET    /api/books           - Lista/paginado/filtros (name, status, tag, page, pageSize)
+GET    /api/books/random    - Libro al azar respetando los mismos filtros (404 NO_BOOKS_TO_PICK si no hay)
 GET    /api/books/:id       - Libro por id
 POST   /api/books           - Crear libro
 PATCH  /api/books/:id       - Actualizar libro

@@ -68,6 +68,11 @@ export async function getBook(id: number): Promise<Book> {
   return data
 }
 
+export async function pickRandomBook(filters: BookFilters = {}): Promise<Book> {
+  const { data } = await api.get<Book>('/books/random', { params: filters })
+  return data
+}
+
 export async function createBook(input: BookInput): Promise<Book> {
   const { data } = await api.post<Book>('/books', input)
   return data
