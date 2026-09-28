@@ -55,27 +55,17 @@ export interface BookFilters {
 
 export interface BookInput {
   name: string
-  secundaryName?: string
+  secundaryName?: string | null
   url: string
   lastChapter: number
   status: number
   rating: number
-  coverPath?: string
-  completedAt?: string
+  coverPath?: string | null
+  completedAt?: string | null
   tags: string[]
 }
 
-export interface BookUpdateInput {
-  name?: string
-  secundaryName?: string
-  url?: string
-  lastChapter?: number
-  status?: number
-  rating?: number
-  coverPath?: string | null
-  completedAt?: string
-  tags?: string[]
-}
+export type BookUpdateInput = Partial<BookInput>
 
 export interface CoverUploadResult {
   path: string

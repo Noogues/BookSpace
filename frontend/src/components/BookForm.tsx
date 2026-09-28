@@ -197,13 +197,13 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
 
     onSubmit({
       name: name.trim(),
-      secundaryName: secundaryName.trim() || undefined,
+      secundaryName: secundaryName.trim() || null,
       url: url.trim(),
       lastChapter: chapter,
       status: Number(status),
       rating: Number.isFinite(ratingValue) ? ratingValue : 0,
-      coverPath: coverPath ?? undefined,
-      completedAt: completedAt ? new Date(`${completedAt}T00:00:00`).toISOString() : undefined,
+      coverPath,
+      completedAt: completedAt ? new Date(`${completedAt}T00:00:00`).toISOString() : null,
       tags,
     })
   }
