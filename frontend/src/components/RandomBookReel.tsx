@@ -6,7 +6,7 @@ import { CoverImage } from './CoverImage'
 const ITEM_WIDTH = 148
 const GAP = 16
 const PITCH = ITEM_WIDTH + GAP
-const LEAD_COUNT = 12
+const SPIN_COUNT = 12
 const ROLL_MS = 3650
 const COVER_WAIT_MS = 600
 const EASE = 'cubic-bezier(0.1, 0.72, 0.15, 1)'
@@ -57,10 +57,21 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
     landedRef.current = onLanded
   }, [onLanded])
 
+  const prepend = Math.max(1, Math.ceil(viewportWidth / 2 / PITCH))
+  const leadCount = prepend + SPIN_COUNT
+
   const lead = useMemo(
-    () => Array.from({ length: LEAD_COUNT }, (_, index) => order[index % order.length]),
-    [order],
+    () => Array.from({ length: leadCount }, (_, index) => order[index % order.length]),
+    [order, leadCount],
   )
+
+  const trailing = useMemo(() => {
+    const needed = Math.ceil((viewportWidth / 2 + GAP) / PITCH) + 1
+    return Array.from(
+      { length: needed },
+      (_, index) => order[(leadCount + index) % order.length],
+    )
+  }, [order, viewportWidth, leadCount])
 
   useLayoutEffect(() => {
     const element = viewportRef.current
@@ -72,15 +83,8 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
     return () => observer.disconnect()
   }, [])
 
-  const trailing = useMemo(() => {
-    const needed = Math.ceil((viewportWidth / 2 + GAP) / PITCH) + 1
-    return Array.from(
-      { length: needed },
-      (_, index) => order[(LEAD_COUNT + index) % order.length],
-    )
-  }, [order, viewportWidth])
-
-  const endX = viewportWidth / 2 - LEAD_COUNT * PITCH - ITEM_WIDTH / 2
+  const endX = viewportWidth / 2 - leadCount * PITCH - ITEM_WIDTH / 2
+  const startX = viewportWidth / 2 - prepend * PITCH - ITEM_WIDTH / 2
 
   useEffect(() => {
     if (coverReady) return
@@ -93,7 +97,10 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
     if (!strip || !coverReady || viewportWidth <= 0 || order.length === 0) return
 
     const animation = strip.animate(
-      [{ transform: 'translate3d(0px, 0, 0)' }, { transform: `translate3d(${endX}px, 0, 0)` }],
+      [
+        { transform: `translate3d(${startX}px, 0, 0)` },
+        { transform: `translate3d(${endX}px, 0, 0)` },
+      ],
       { duration: ROLL_MS, easing: EASE, fill: 'forwards' },
     )
     animation.finished
@@ -105,7 +112,7 @@ export function RandomBookReel({ candidates, target, onLanded }: RandomBookReelP
     return () => {
       animation.cancel()
     }
-  }, [coverReady, viewportWidth, endX, order.length])
+  }, [coverReady, viewportWidth, startX, endX, order.length])
 
   return (
     <div className="relative">
