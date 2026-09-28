@@ -41,7 +41,7 @@ export function RandomPickModal({ book, candidates, rollId, onClose, onPickAgain
   const showResult = book !== null && (landed || !roll)
 
   return (
-    <Modal open={open} onClose={onClose} title={t('books.randomTitle')}>
+    <Modal open={open} onClose={onClose} title={t('books.randomTitle')} wide>
       {book === null ? (
         <div className="flex flex-col items-center gap-4">
           <div className="flex w-full justify-center gap-4 overflow-hidden" aria-hidden="true">

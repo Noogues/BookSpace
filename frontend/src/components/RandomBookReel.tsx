@@ -7,7 +7,7 @@ const ITEM_WIDTH = 148
 const GAP = 16
 const PITCH = ITEM_WIDTH + GAP
 const LEAD_COUNT = 12
-const ROLL_MS = 1650
+const ROLL_MS = 3650
 const COVER_WAIT_MS = 600
 const EASE = 'cubic-bezier(0.1, 0.72, 0.15, 1)'
 
