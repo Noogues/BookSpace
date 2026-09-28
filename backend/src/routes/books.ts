@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { parseExcel } from '../lib/excel.js'
 import { prisma } from '../lib/prisma.js'
 import { requireAuth } from '../lib/auth.js'
-import { deleteCoverFile } from './covers.js'
+import { deleteCoverFiles } from '../lib/images.js'
 import type { Prisma } from '../../generated/prisma/client.js'
 
 const bookInclude = { tags: { include: { tag: true } } } as const
@@ -157,7 +157,7 @@ export async function booksRoutes(
         ...(data.lastChapter !== undefined ? { lastChapter: data.lastChapter } : {}),
         ...(data.status !== undefined ? { status: data.status } : {}),
         ...(data.rating !== undefined ? { rating: data.rating } : {}),
-        ...(data.coverPath !== undefined ? { coverPath: data.coverPath as string } : {}),
+        ...(data.coverPath !== undefined ? { coverPath: data.coverPath } : {}),
         ...(data.completedAt !== undefined ? { completedAt: data.completedAt } : {}),
         ...(tagIds !== undefined
           ? {
@@ -172,7 +172,7 @@ export async function booksRoutes(
     })
 
     if (coverPathToDelete) {
-      await deleteCoverFile(dir, coverPathToDelete)
+      await deleteCoverFiles(dir, coverPathToDelete)
     }
 
     return result
@@ -183,7 +183,7 @@ export async function booksRoutes(
     const existing = await prisma.book.findUnique({ where: { id } })
     if (!existing) return reply.status(404).send({ error: 'Libro no encontrado' })
     if (existing.coverPath) {
-      await deleteCoverFile(dir, existing.coverPath)
+      await deleteCoverFiles(dir, existing.coverPath)
     }
     await prisma.book.delete({ where: { id } })
     return reply.status(204).send()
@@ -215,7 +215,7 @@ export async function booksRoutes(
             lastChapter: book.lastChapter,
             status: book.status,
             rating: 0,
-            coverPath: null as unknown as string,
+            coverPath: null,
           },
         })
         createdCount += 1

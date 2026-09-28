@@ -7,9 +7,11 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { ZodError } from 'zod'
 import { booksRoutes } from './routes/books.js'
-import { coversRoutes, MAX_UPLOAD_BYTES } from './routes/covers.js'
+import { coversRoutes } from './routes/covers.js'
 import { tagsRoutes } from './routes/tags.js'
 import { authRoutes } from './routes/auth.js'
+import { MAX_UPLOAD_BYTES } from './lib/images.js'
+import { runCoverMigration } from './lib/cover-migration.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -22,7 +24,14 @@ await app.register(multipart, {
 })
 
 const coversDir = process.env.COVERS_DIR ?? path.join(__dirname, '../../data/covers')
-await app.register(fastifyStatic, { root: coversDir, prefix: '/covers' })
+await app.register(fastifyStatic, {
+  root: coversDir,
+  prefix: '/covers',
+  maxAge: '365d',
+  immutable: true,
+  etag: true,
+  lastModified: true,
+})
 
 await app.register(booksRoutes, { prefix: '/api', coversDir })
 await app.register(coversRoutes, { prefix: '/api', coversDir })
@@ -53,3 +62,10 @@ app.setErrorHandler((error, request, reply) => {
 
 const port = Number(process.env.PORT ?? 3000)
 await app.listen({ port, host: '0.0.0.0' })
+
+void runCoverMigration(coversDir, (level, message, err) => {
+  if (err !== undefined) app.log[level]({ err }, message)
+  else app.log[level](message)
+}).catch((error: unknown) => {
+  app.log.error({ err: error }, 'Cover migration could not start')
+})
