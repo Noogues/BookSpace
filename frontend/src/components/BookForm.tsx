@@ -1,8 +1,10 @@
 import { useState, type ChangeEvent, type FormEvent, type KeyboardEvent, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Ban, BookOpen, CheckCircle2, Clock, ImagePlus, Link as LinkIcon, Minus, Plus, Sparkles, Star, X } from 'lucide-react'
+import type { TFunction } from 'i18next'
 import type { Book, BookInput } from '../lib/types'
-import { errorStatus, listTags, uploadCover } from '../lib/api'
+import { errorData, errorStatus, importCoverUrl, listTags, uploadCover } from '../lib/api'
+import { compressImage } from '../lib/image'
 import { resolveCoverPath } from '../lib/format'
 import { useToast } from './toast-context'
 import { AddChaptersMenu } from './AddChaptersMenu'
@@ -21,6 +23,28 @@ const STATUS_OPTIONS = [
   { value: 2, icon: CheckCircle2 },
   { value: 3, icon: Ban },
 ]
+
+const COVER_ERROR_KEYS: Record<string, string> = {
+  UNSUPPORTED_MIME: 'errors.invalidImage',
+  INVALID_IMAGE: 'errors.invalidImage',
+  TOO_MANY_PIXELS: 'errors.imageDimensions',
+  TOO_LARGE: 'errors.imageTooLarge',
+  INVALID_REMOTE: 'errors.coverImport',
+  BLOCKED_HOST: 'errors.coverImport',
+}
+
+function coverErrorMessage(error: unknown, t: TFunction): string {
+  const code = errorData(error)?.error
+  if (code && COVER_ERROR_KEYS[code]) return t(COVER_ERROR_KEYS[code])
+  const status = errorStatus(error)
+  if (status === 413) return t('errors.imageTooLarge')
+  if (status === 400) return t('errors.invalidImage')
+  return t('errors.imageSave')
+}
+
+function isRemoteCover(value: string | null): boolean {
+  return /^https?:\/\//i.test((value ?? '').trim())
+}
 
 function initialTags(book?: Book | null): string[] {
   return book ? book.tags.map((entry) => entry.tag.name) : []
@@ -63,6 +87,7 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
   const [tagDraft, setTagDraft] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [uploading, setUploading] = useState(false)
+  const [importingUrl, setImportingUrl] = useState(false)
   const [existingTags, setExistingTags] = useState<string[]>([])
   const { push } = useToast()
   const previewRef = useRef<string | null>(null)
@@ -113,12 +138,12 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
     setPreviewUrl(objectUrl)
     setUploading(true)
     try {
-      const { path } = await uploadCover(file)
+      const { path } = await uploadCover(await compressImage(file))
       setCoverPath(path)
+      setPreviewUrl(null)
       push('success', t('toast.coverUploaded'))
     } catch (error) {
-      const status = errorStatus(error)
-      push('error', status === 413 ? t('errors.imageTooLarge') : status === 400 ? t('errors.invalidImage') : t('errors.imageSave'))
+      push('error', coverErrorMessage(error, t))
       setPreviewUrl(null)
       if (previewRef.current) {
         URL.revokeObjectURL(previewRef.current)
@@ -126,6 +151,21 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
       }
     } finally {
       setUploading(false)
+    }
+  }
+
+  const handleImportCoverUrl = async () => {
+    const url = (coverPath ?? '').trim()
+    if (!url || importingUrl) return
+    setImportingUrl(true)
+    try {
+      const { path } = await importCoverUrl(url)
+      setCoverPath(path)
+      push('success', t('toast.coverImported'))
+    } catch (error) {
+      push('error', coverErrorMessage(error, t))
+    } finally {
+      setImportingUrl(false)
     }
   }
 
@@ -394,11 +434,24 @@ export function BookForm({ initial, submitting, onSubmit }: BookFormProps) {
               <Sparkles className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 dark:text-neon-indigo/70" aria-hidden="true" />
               <input
                 id="book-cover"
-                className="input pl-10"
+                className={`input pl-10 ${isRemoteCover(coverPath) ? 'pr-28' : ''}`}
                 placeholder={t('books.coverUrlHint')}
                 value={coverPath ?? ''}
                 onChange={(event) => setCoverPath(event.target.value || null)}
               />
+              {isRemoteCover(coverPath) ? (
+                <button
+                  type="button"
+                  onClick={() => void handleImportCoverUrl()}
+                  disabled={importingUrl}
+                  className="btn-secondary absolute right-1.5 top-1/2 -translate-y-1/2 px-2.5 py-1.5 text-xs"
+                >
+                  {importingUrl ? (
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-stone-400 border-t-teal-500 dark:border-stone-500 dark:border-t-neon-teal" aria-hidden="true" />
+                  ) : null}
+                  {importingUrl ? t('books.coverImporting') : t('books.coverImport')}
+                </button>
+              ) : null}
             </div>
           </div>
         </div>
