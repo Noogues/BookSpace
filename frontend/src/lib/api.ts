@@ -122,6 +122,16 @@ export async function createTag(name: string): Promise<Tag> {
   return data
 }
 
+export async function renameTag(id: number, name: string): Promise<Tag> {
+  const { data } = await api.patch<Tag>(`/tags/${id}`, { name })
+  return data
+}
+
+export async function mergeTags(sourceId: number, targetId: number): Promise<TagWithCount> {
+  const { data } = await api.post<TagWithCount>('/tags/merge', { sourceId, targetId })
+  return data
+}
+
 export async function deleteTag(id: number): Promise<void> {
   await api.delete(`/tags/${id}`)
 }
