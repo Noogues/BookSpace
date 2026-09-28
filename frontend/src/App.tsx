@@ -6,6 +6,7 @@ import { CommandSearch } from './components/CommandSearch'
 import { MobileDock } from './components/MobileDock'
 import { TopBar } from './components/TopBar'
 import { ToastProvider } from './components/Toast'
+import { AnalyticsPage } from './pages/AnalyticsPage'
 import { ShelfPage } from './pages/ShelfPage'
 import { BookDetailPage } from './pages/BookDetailPage'
 import { ImportPage } from './pages/ImportPage'
@@ -56,6 +57,7 @@ function Shell() {
             <Route path="/" element={<ShelfPage />} />
             <Route path="/shelf" element={<Navigate to="/" replace />} />
             <Route path="/books/:id" element={<BookDetailPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/import" element={<ImportPage />} />
             <Route path="/tags" element={<TagsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
